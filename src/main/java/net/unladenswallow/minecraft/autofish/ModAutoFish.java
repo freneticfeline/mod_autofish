@@ -28,6 +28,8 @@ public class ModAutoFish {
 	
 	public static AutoFishEventHandler eventHandler = new AutoFishEventHandler();
 	
+	public static ModAutoFish instance = new ModAutoFish();
+			
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent preInitEvent) {
 		ModAutoFish.proxy.preInit(preInitEvent);
@@ -37,8 +39,8 @@ public class ModAutoFish {
 	
 	@EventHandler
 	public void init (FMLInitializationEvent event) {
-		ModAutoFish.proxy.init(event);
 		AutoFishLogger.info("Initializing " + ModAutoFish.MODNAME);
+		ModAutoFish.proxy.init(event);
 	}
 
 	public static void syncConfig() {

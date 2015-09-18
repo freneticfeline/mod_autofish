@@ -10,7 +10,8 @@ public class AutoFishConfigGui extends GuiConfig {
 	public AutoFishConfigGui(GuiScreen parent) {
 		super(parent,
 			new ConfigElement(ModAutoFish.configFile.getCategory(Configuration.CATEGORY_GENERAL)).getChildElements(),
-			ModAutoFish.MODID, false, false, GuiConfig.getAbridgedConfigPath(ModAutoFish.configFile.toString())
+			ModAutoFish.MODID, false, false, "AutoFish Forge Mod Options"
 			);
+		this.titleLine2 = GuiConfig.getAbridgedConfigPath(ModAutoFish.configFile.toString());
 	}
 }
