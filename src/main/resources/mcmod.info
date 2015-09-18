@@ -1,0 +1,16 @@
+[
+{
+  "modid": "mod_autofish",
+  "name": "AutoFish Forge Mod",
+  "description": "Automatically reel in and re-cast when fishing.  A blatant copy of troyboy50's LiteMod version of Autofish that is build on Forge instead.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["FreneticFeline"],
+  "credits": "troyboy50 for the original LiteMod Autofish; The Forge and FML team",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
