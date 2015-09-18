@@ -26,12 +26,9 @@ public class KeyInputHandler {
 	@SubscribeEvent
 	public void onKeyInput(InputEvent.KeyInputEvent event) {
 		if (this.options.isPressed()) {
-			AutoFishLogger.info("KeyInputHandler onKeyInput(): handling options key");
 			EntityPlayer player = Minecraft.getMinecraft().thePlayer;
 			if (playerIsHoldingFishingRod(player)) {
-				AutoFishLogger.info("KeyInputHandler onKeyInput(): holding fishing rod");
 				Minecraft.getMinecraft().displayGuiScreen(new AutoFishConfigGui(Minecraft.getMinecraft().currentScreen));
-//				player.openGui(ModAutoFish.instance, 0, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);
 			}
 		}
 	}
