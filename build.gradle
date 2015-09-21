@@ -17,7 +17,7 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.8-1.0"
+version = "1.8-1.1"
 group= "net.unladenswallow.minecraft.autofish" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "mod_autofish_forge"
 
