@@ -17,12 +17,12 @@ buildscript {
 
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "1.8-1.2"
+version = "1.8.9-1.1"
 group= "net.unladenswallow.minecraft.autofish" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "mod_autofish_forge"
 
 minecraft {
-    version = "1.8.9-11.15.1.1758"
+    version = "1.8.9-11.15.1.1722"
     runDir = "eclipse"
     
     // the mappings can be changed at any time, and must be in the following format.

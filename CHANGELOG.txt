@@ -1,6 +1,6 @@
-1.8-1.2
+1.8.9-1.1
 =======
-Update dependencies to work on Minecraft 1.8.8 upwards.
+Update to work on Minecraft 1.8.9. (Thanks SpacyNG)
 
 1.8-1.1
 =======

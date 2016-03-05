@@ -13,7 +13,7 @@ guiFactory = "net.unladenswallow.minecraft.autofish.AutoFishGuiFactory")
 public class ModAutoFish {
 	public static final String MODID = "mod_autofish";
 	public static final String MODNAME = "AutoFish Forge Mod";
-	public static final String VERSION = "1.8-1.2";
+	public static final String VERSION = "1.8.9-1.1";
 	
 	public static Configuration configFile;
 	public static boolean config_autofish_enable;
