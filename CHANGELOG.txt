@@ -1,3 +1,7 @@
+1.8-1.2
+=======
+Update dependencies to work on Minecraft 1.8.8 upwards.
+
 1.8-1.1
 =======
 Implement a hotkey to reach the AutoFish options screen while in-game.
