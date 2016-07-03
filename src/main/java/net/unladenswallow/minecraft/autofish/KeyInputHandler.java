@@ -12,32 +12,32 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
 
 public class KeyInputHandler {
 
-	public KeyBinding options;
-	
-	public KeyInputHandler() {
-		init();
-	}
-	
-	public void init() {
-		options = new KeyBinding("key.options", Keyboard.KEY_O, "key.categories.mod_autofish");
-		ClientRegistry.registerKeyBinding(options);
-	}
-	
-	@SubscribeEvent
-	public void onKeyInput(InputEvent.KeyInputEvent event) {
-		if (this.options.isPressed()) {
-			EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-			if (playerIsHoldingFishingRod(player)) {
-				Minecraft.getMinecraft().displayGuiScreen(new AutoFishConfigGui(Minecraft.getMinecraft().currentScreen));
-			}
-		}
-	}
+    public KeyBinding options;
+    
+    public KeyInputHandler() {
+        init();
+    }
+    
+    public void init() {
+        options = new KeyBinding("key.options", Keyboard.KEY_O, "key.categories.mod_autofish");
+        ClientRegistry.registerKeyBinding(options);
+    }
+    
+    @SubscribeEvent
+    public void onKeyInput(InputEvent.KeyInputEvent event) {
+        if (this.options.isPressed()) {
+            EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+            if (playerIsHoldingFishingRod(player)) {
+                Minecraft.getMinecraft().displayGuiScreen(new AutoFishConfigGui(Minecraft.getMinecraft().currentScreen));
+            }
+        }
+    }
 
-	private boolean playerIsHoldingFishingRod(EntityPlayer player) {
-		return (!Minecraft.getMinecraft().isGamePaused()
-				&& player != null
-				&& player.getHeldItem() != null
-				&& player.getHeldItem().getItem() == Items.fishing_rod);
-	}
-	
+    private boolean playerIsHoldingFishingRod(EntityPlayer player) {
+        return (!Minecraft.getMinecraft().isGamePaused()
+                && player != null
+                && player.getHeldItem() != null
+                && player.getHeldItem().getItem() == Items.fishing_rod);
+    }
+    
 }

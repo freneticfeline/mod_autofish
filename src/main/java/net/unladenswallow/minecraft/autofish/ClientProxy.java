@@ -16,9 +16,9 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void init(FMLInitializationEvent e) {
         super.init(e);
-		FMLCommonHandler.instance().bus().register(ModAutoFish.eventHandler);
-		FMLCommonHandler.instance().bus().register(new KeyInputHandler());
-		MinecraftForge.EVENT_BUS.register(ModAutoFish.eventHandler);
+        FMLCommonHandler.instance().bus().register(ModAutoFish.eventHandler);
+        FMLCommonHandler.instance().bus().register(new KeyInputHandler());
+        MinecraftForge.EVENT_BUS.register(ModAutoFish.eventHandler);
     }
 
     @Override
