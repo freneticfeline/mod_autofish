@@ -5,6 +5,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -36,12 +37,12 @@ public class AutoFishEventHandler {
                             ticksInWater++;
                             if (ticksInWater > INWATER_DELAY_TICK_LENGTH && Math.abs(player.fishEntity.motionY) > MOTION_Y_THRESHOLD) {
                                 caughtFish = true;
-                                minecraft.playerController.sendUseItem(player, minecraft.theWorld, player.getHeldItem());
+                                minecraft.playerController.processRightClick(player, minecraft.theWorld, player.getHeldItemMainhand(), EnumHand.MAIN_HAND);
                                 castQueuedAt = minecraft.theWorld.getTotalWorldTime();
                             }
                         }
                     } else if (castQueued() && minecraft.theWorld.getTotalWorldTime() > castQueuedAt + QUEUE_TICK_LENGTH) {
-                        minecraft.playerController.sendUseItem(player, minecraft.theWorld, player.getHeldItem());
+                        minecraft.playerController.processRightClick(player, minecraft.theWorld, player.getHeldItemMainhand(), EnumHand.MAIN_HAND);
                         castQueuedAt = -1;
                     } else {
                         ticksInWater = 0;
@@ -76,7 +77,7 @@ public class AutoFishEventHandler {
     }
 
     private boolean canCast(EntityPlayer player) {
-        ItemStack heldItem = player.getHeldItem();
+        ItemStack heldItem = player.getHeldItemMainhand();
         if (heldItem != null && heldItem.getItem() == Items.fishing_rod) {
         }
         return (ModAutoFish.config_autofish_enable
@@ -90,7 +91,7 @@ public class AutoFishEventHandler {
 
     @SubscribeEvent
     public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent eventArgs) {
-        if (eventArgs.modID.equals(ModAutoFish.MODID)) {
+        if (eventArgs.getModID().equals(ModAutoFish.MODID)) {
             ModAutoFish.syncConfig();
         }
     }

@@ -36,8 +36,8 @@ public class KeyInputHandler {
     private boolean playerIsHoldingFishingRod(EntityPlayer player) {
         return (!Minecraft.getMinecraft().isGamePaused()
                 && player != null
-                && player.getHeldItem() != null
-                && player.getHeldItem().getItem() == Items.fishing_rod);
+                && player.getHeldItemMainhand() != null
+                && player.getHeldItemMainhand().getItem() == Items.fishing_rod);
     }
     
 }
