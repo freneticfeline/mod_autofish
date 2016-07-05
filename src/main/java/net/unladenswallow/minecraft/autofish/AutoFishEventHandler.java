@@ -94,13 +94,21 @@ public class AutoFishEventHandler {
     private boolean isFishBiting() {
         EntityPlayer serverPlayerEntity = getServerPlayerEntity();
         if (serverPlayerEntity != null) {
-            return isFishBiting_integratedServer(serverPlayerEntity);
+            /* If single player (integrated server), we can actually check to see if something
+             * is catchable, but it's fragile (other mods could break it)
+             * If anything goes wrong, fall back to the safer but less reliable method
+             */
+            try {
+                return isFishBiting_fromServerEntity(serverPlayerEntity);
+            } catch (Exception e) {
+                return isFishBiting_fromMovement();
+            }
         } else {
-            return isFishBiting_remoteServer();
+            return isFishBiting_fromMovement();
         }
     }
 
-    private boolean isFishBiting_remoteServer() {
+    private boolean isFishBiting_fromMovement() {
         EntityFishHook fishEntity = this.player.fishEntity;
         if (fishEntity != null 
                 && fishEntity.motionX == 0 
@@ -111,18 +119,16 @@ public class AutoFishEventHandler {
         return false;
     }
 
-    private boolean isFishBiting_integratedServer(EntityPlayer serverPlayerEntity) {
+    private boolean isFishBiting_fromServerEntity(EntityPlayer serverPlayerEntity) throws NumberFormatException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
         /*
          * The fish hook entity on the server side knows whether a fish is catchable at any given time.  However,
          * that field is private and not exposed in any way.  So we must use reflection to access that field.
          */
         EntityFishHook serverFishEntity = serverPlayerEntity.fishEntity;
-        try {
-            int ticksCatchable = getPrivateIntFieldFromObject(serverFishEntity, "ticksCatchable");
-            if (ticksCatchable > 0) {
-                return true;
-            }
-        } catch (Exception e) {}
+        int ticksCatchable = getPrivateIntFieldFromObject(serverFishEntity, "ticksCatchable", "field_146045_ax");
+        if (ticksCatchable > 0) {
+            return true;
+        }
         return false;
     }
 
@@ -134,10 +140,20 @@ public class AutoFishEventHandler {
      * 
      * @return The int value of the private member data from object with fieldName
      */
-    private int getPrivateIntFieldFromObject(Object object, String fieldName) throws NoSuchFieldException, SecurityException, NumberFormatException, IllegalArgumentException, IllegalAccessException {
-        Field targetField = object.getClass().getDeclaredField("ticksCatchable");
-        targetField.setAccessible(true);
-        return Integer.valueOf(targetField.get(object).toString()).intValue();
+    private int getPrivateIntFieldFromObject(Object object, String forgeFieldName, String vanillaFieldName) throws NoSuchFieldException, SecurityException, NumberFormatException, IllegalArgumentException, IllegalAccessException {
+        Field targetField = null;
+        try {
+            targetField = object.getClass().getDeclaredField(forgeFieldName);
+        } catch (NoSuchFieldException e) {
+            targetField = object.getClass().getDeclaredField(vanillaFieldName);
+        }
+        if (targetField != null) {
+            targetField.setAccessible(true);
+            return Integer.valueOf(targetField.get(object).toString()).intValue();
+        } else {
+            return 0;
+        }
+            
     }
 
     private EntityPlayer getServerPlayerEntity() {
