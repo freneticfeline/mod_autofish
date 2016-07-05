@@ -7,13 +7,10 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid = ModAutoFish.MODID, name = ModAutoFish.MODNAME,
-version = ModAutoFish.VERSION, useMetadata = true,
+@Mod(modid = ModAutoFish.MODID, useMetadata = true,
 guiFactory = "net.unladenswallow.minecraft.autofish.AutoFishGuiFactory")
 public class ModAutoFish {
     public static final String MODID = "mod_autofish";
-    public static final String MODNAME = "AutoFish Forge Mod";
-    public static final String VERSION = "1.8.9-1.1";
     
     public static Configuration configFile;
     public static boolean config_autofish_enable;
@@ -39,7 +36,7 @@ public class ModAutoFish {
     
     @EventHandler
     public void init (FMLInitializationEvent event) {
-        AutoFishLogger.info("Initializing " + ModAutoFish.MODNAME);
+        AutoFishLogger.info("Initializing " + ModAutoFish.MODID);
         ModAutoFish.proxy.init(event);
     }
 
