@@ -37,7 +37,7 @@ public class KeyInputHandler {
         return (!Minecraft.getMinecraft().isGamePaused()
                 && player != null
                 && player.getHeldItemMainhand() != null
-                && player.getHeldItemMainhand().getItem() == Items.fishing_rod);
+                && player.getHeldItemMainhand().getItem() == Items.FISHING_ROD);
     }
     
 }

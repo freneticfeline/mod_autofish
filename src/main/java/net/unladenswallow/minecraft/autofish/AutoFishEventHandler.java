@@ -87,7 +87,7 @@ public class AutoFishEventHandler {
         ItemStack heldItem = this.player.getHeldItemMainhand();
 
         return (heldItem != null
-                && heldItem.getItem() == Items.fishing_rod
+                && heldItem.getItem() == Items.FISHING_ROD
                 && heldItem.getItemDamage() <= heldItem.getMaxDamage());
     }
 
@@ -181,7 +181,7 @@ public class AutoFishEventHandler {
         for (int i = 0; i < 9; i++) {
             ItemStack curItemStack = inventory.mainInventory[i];
             if (curItemStack != null 
-                    && curItemStack.getItem() == Items.fishing_rod
+                    && curItemStack.getItem() == Items.FISHING_ROD
                     && (!ModAutoFish.config_autofish_preventBreak || (curItemStack.getMaxDamage() - curItemStack.getItemDamage() > AUTOFISH_BREAKPREVENT_THRESHOLD))
                 ) {
                 inventory.currentItem = i;
