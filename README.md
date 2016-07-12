@@ -11,7 +11,7 @@ This mod is a blatant copy of the functionality provided by the LiteMod Autofish
 by troyboy50.  It is not affiliated with or endorsed by troyboy50.
 
 ## Installation Requirements
-AutoFish Forge Mod versions 1.8-x.x require Minecraft 1.8 with compatible version
+AutoFish Forge Mod versions 1.x-y.z require Minecraft 1.x with compatible version
 of MinecraftForge installed.
 
 ## Installation Instructions

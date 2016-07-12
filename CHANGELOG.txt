@@ -1,3 +1,7 @@
+1.10-1.2
+========
+Update to work on Minecraft/Forge 1.10 and 1.10.2
+
 1.9.4-1.2
 =======
 Update to work on Minecraft/Forge 1.9.4
