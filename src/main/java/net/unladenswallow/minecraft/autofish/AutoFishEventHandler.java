@@ -23,13 +23,13 @@ public class AutoFishEventHandler {
     private static final int CAST_QUEUE_TICK_DELAY = 30;
     private static final int REEL_TICK_DELAY = 5;
     private static final int AUTOFISH_BREAKPREVENT_THRESHOLD = 2;
-    private static final double MOTION_Y_THRESHOLD = -0.02d;
+    private static final double MOTION_Y_THRESHOLD = -0.05d;
     
     @SubscribeEvent
     public void onClientTickEvent(ClientTickEvent event) {
         this.minecraft = Minecraft.getMinecraft();
-        if (ModAutoFish.config_autofish_enable && !this.minecraft.isGamePaused() && this.minecraft.thePlayer != null) {
-            this.player = this.minecraft.thePlayer;
+        if (ModAutoFish.config_autofish_enable && !this.minecraft.isGamePaused() && this.minecraft.player != null) {
+            this.player = this.minecraft.player;
 
             if (playerHookInWater() && !isDuringReelDelay() && isFishBiting()) {
                 startReelDelay();
@@ -59,7 +59,7 @@ public class AutoFishEventHandler {
     }
 
     private void scheduleNextCast() {
-        this.castScheduledAt = this.minecraft.theWorld.getTotalWorldTime();
+        this.castScheduledAt = this.minecraft.world.getTotalWorldTime();
     }
 
     /*
@@ -67,7 +67,7 @@ public class AutoFishEventHandler {
      *  which can persist for 2-3 ticks.
      */
     private void startReelDelay() {
-        this.startedReelDelayAt = this.minecraft.theWorld.getTotalWorldTime();
+        this.startedReelDelayAt = this.minecraft.world.getTotalWorldTime();
     }
 
     private void resetReelDelay() {
@@ -75,7 +75,7 @@ public class AutoFishEventHandler {
     }
 
     private boolean isDuringReelDelay() {
-        return (this.startedReelDelayAt != 0 && this.minecraft.theWorld.getTotalWorldTime() < this.startedReelDelayAt + REEL_TICK_DELAY);
+        return (this.startedReelDelayAt != 0 && this.minecraft.world.getTotalWorldTime() < this.startedReelDelayAt + REEL_TICK_DELAY);
     }
     
     private boolean playerHookInWater() {
@@ -160,26 +160,25 @@ public class AutoFishEventHandler {
         if (this.minecraft.getIntegratedServer() == null || this.minecraft.getIntegratedServer().getEntityWorld() == null) {
             return null;
         } else {
-            return this.minecraft.getIntegratedServer().getEntityWorld().getPlayerEntityByName(this.minecraft.thePlayer.getName());
+            return this.minecraft.getIntegratedServer().getEntityWorld().getPlayerEntityByName(this.minecraft.player.getName());
         }
     }
 
     private EnumActionResult playerUseRod() {
         return this.minecraft.playerController.processRightClick(
                 this.player, 
-                this.minecraft.theWorld, 
-                this.player.getHeldItemMainhand(), 
+                this.minecraft.world, 
                 EnumHand.MAIN_HAND);
     }
     
     private boolean isTimeToCast() {
-        return (this.castScheduledAt != 0 && this.minecraft.theWorld.getTotalWorldTime() > this.castScheduledAt + CAST_QUEUE_TICK_DELAY);
+        return (this.castScheduledAt != 0 && this.minecraft.world.getTotalWorldTime() > this.castScheduledAt + CAST_QUEUE_TICK_DELAY);
     }
 
     private void tryToSwitchRods() {
         InventoryPlayer inventory = this.player.inventory;
         for (int i = 0; i < 9; i++) {
-            ItemStack curItemStack = inventory.mainInventory[i];
+            ItemStack curItemStack = inventory.mainInventory.get(i);
             if (curItemStack != null 
                     && curItemStack.getItem() == Items.FISHING_ROD
                     && (!ModAutoFish.config_autofish_preventBreak || (curItemStack.getMaxDamage() - curItemStack.getItemDamage() > AUTOFISH_BREAKPREVENT_THRESHOLD))
