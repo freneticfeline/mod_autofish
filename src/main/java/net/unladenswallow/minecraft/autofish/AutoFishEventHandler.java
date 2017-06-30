@@ -10,6 +10,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -20,9 +21,25 @@ public class AutoFishEventHandler {
     private EntityPlayer player;
     private long castScheduledAt = 0L;
     private long startedReelDelayAt = 0L;
+    private long startedCastDelayAt = 0L;
+    private boolean isFishing = false;
+    
+    /** How long to wait after reeling in a catch before casting again */
     private static final int CAST_QUEUE_TICK_DELAY = 30;
+
+    /** How long to suppress checking for a bite after starting to reel in.  If we check for a bite while reeling
+        in, we may think we have a bite and try to reel in again, which will actually cause a re-cast and lose the fish */
     private static final int REEL_TICK_DELAY = 5;
+
+    /** How long to wait after casting to check for Entity Clear.  If we check too soon, the hook entity
+        isn't in the world yet, and will trigger a false alarm and cause infinite recasting. */
+    private static final int CAST_TICK_DELAY = 5;
+
+    /** When Break Prevention is enabled, how low to let the durability get before stopping or switching rods */
     private static final int AUTOFISH_BREAKPREVENT_THRESHOLD = 2;
+
+    /** The threshold for vertical movement of the fish hook that determines when a fish is biting, if using
+        the movement method of detection. */
     private static final double MOTION_Y_THRESHOLD = -0.05d;
     
     @SubscribeEvent
@@ -31,25 +48,57 @@ public class AutoFishEventHandler {
         if (ModAutoFish.config_autofish_enable && !this.minecraft.isGamePaused() && this.minecraft.player != null) {
             this.player = this.minecraft.player;
 
-            if (playerHookInWater() && !isDuringReelDelay() && isFishBiting()) {
-                startReelDelay();
-                playerUseRod();
-                scheduleNextCast();
-            } else if (isTimeToCast()) {
-                if (needToSwitchRods()) {
-                    tryToSwitchRods();
+            if (playerIsHoldingRod()) {
+                if (playerHookInWater() && !isDuringReelDelay() && isFishBiting()) {
+                    startReelDelay();
+                    reelIn();
+                    scheduleNextCast();
+                } else if (isTimeToCast()) {
+                    if (needToSwitchRods()) {
+                        tryToSwitchRods();
+                    }
+                    if (playerCanCast()) {
+                        startFishing();
+                    }
+                    // Resetting these values is not strictly necessary, but will improve the performance
+                    // of the check that potentially occurs every tick.
+                    resetReelDelay();
+                    resetCastSchedule();
                 }
-                if (playerCanCast()) {
-                    playerUseRod();
+                
+                if (ModAutoFish.config_autofish_entityClearProtect && this.isFishing && !isDuringCastDelay() && this.player.fishEntity == null) {
+                    AutoFishLogger.info("Entity Clear detected.  Re-casting.");
+                    this.isFishing = false;
+                    startFishing();
                 }
-                // Resetting these values is not strictly necessary, but will improve the performance
-                // of the check that potentially occurs every tick.
-                resetReelDelay();
-                resetCastSchedule();
+                
+            } else {
+                this.isFishing = false;
             }
         }
     }
     
+    @SubscribeEvent
+    public void onPlayerUseItem(PlayerInteractEvent.RightClickItem event) {
+        // Only do this on the client side
+        if (event.getWorld().isRemote && playerIsHoldingRod()) {
+            this.isFishing = !this.isFishing;
+//            AutoFishLogger.info("Player %s fishing", this.isFishing ? "started" : "stopped");
+            if (this.isFishing) {
+                startCastDelay();
+            }
+        }
+    }
+    
+    private void reelIn() {
+        playerUseRod();
+    }
+
+    private void startFishing() {
+        playerUseRod();
+        startCastDelay();
+    }
+
     private void resetCastSchedule() {
         this.castScheduledAt = 0;
     }
@@ -70,12 +119,23 @@ public class AutoFishEventHandler {
         this.startedReelDelayAt = this.minecraft.world.getTotalWorldTime();
     }
 
+    /*
+     * Trigger a delay so that entity clear protection doesn't kick in during cast.
+     */
+    private void startCastDelay() {
+        this.startedCastDelayAt = this.minecraft.world.getTotalWorldTime();
+    }
+
     private void resetReelDelay() {
         startedReelDelayAt = 0;
     }
 
     private boolean isDuringReelDelay() {
         return (this.startedReelDelayAt != 0 && this.minecraft.world.getTotalWorldTime() < this.startedReelDelayAt + REEL_TICK_DELAY);
+    }
+    
+    private boolean isDuringCastDelay() {
+        return (this.startedCastDelayAt != 0 && this.minecraft.world.getTotalWorldTime() < this.startedCastDelayAt + CAST_TICK_DELAY);
     }
     
     private boolean playerHookInWater() {
@@ -111,6 +171,7 @@ public class AutoFishEventHandler {
     private boolean isFishBiting_fromMovement() {
         EntityFishHook fishEntity = this.player.fishEntity;
         if (fishEntity != null 
+                // Checking for no X and Z motion prevents a false alarm when the hook is moving through the air
                 && fishEntity.motionX == 0 
                 && fishEntity.motionZ == 0 
                 && fishEntity.motionY < MOTION_Y_THRESHOLD) {
