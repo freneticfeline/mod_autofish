@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
@@ -24,8 +25,7 @@ public class AutoFishEventHandler {
     private long startedCastDelayAt = 0L;
     private boolean isFishing = false;
     
-    /** How long to wait after reeling in a catch before casting again */
-    private static final int CAST_QUEUE_TICK_DELAY = 30;
+    private static final int TICKS_PER_SECOND = 20;
 
     /** How long to suppress checking for a bite after starting to reel in.  If we check for a bite while reeling
         in, we may think we have a bite and try to reel in again, which will actually cause a re-cast and lose the fish */
@@ -42,9 +42,12 @@ public class AutoFishEventHandler {
         the movement method of detection. */
     private static final double MOTION_Y_THRESHOLD = -0.05d;
     
+    public AutoFishEventHandler() {
+        this.minecraft = FMLClientHandler.instance().getClient();
+    }
+    
     @SubscribeEvent
     public void onClientTickEvent(ClientTickEvent event) {
-        this.minecraft = Minecraft.getMinecraft();
         if (ModAutoFish.config_autofish_enable && !this.minecraft.isGamePaused() && this.minecraft.player != null) {
             this.player = this.minecraft.player;
 
@@ -233,7 +236,7 @@ public class AutoFishEventHandler {
     }
     
     private boolean isTimeToCast() {
-        return (this.castScheduledAt != 0 && this.minecraft.world.getTotalWorldTime() > this.castScheduledAt + CAST_QUEUE_TICK_DELAY);
+        return (this.castScheduledAt != 0 && this.minecraft.world.getTotalWorldTime() > this.castScheduledAt + (ModAutoFish.config_autofish_recastDelay * TICKS_PER_SECOND));
     }
 
     private void tryToSwitchRods() {

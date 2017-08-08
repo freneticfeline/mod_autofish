@@ -15,7 +15,7 @@ AutoFish Forge Mod versions 1.x-y.z require Minecraft 1.x with compatible versio
 of MinecraftForge installed.
 
 ## Installation Instructions
-Copy the `mod_autofish_forge-1.8-x.x.jar` file to the `mods` directory in your Minecraft
+Copy the `mod_autofish_forge-1.x-x.x.jar` file to the `mods` directory in your Minecraft
 data directory.
 
 ## Usage Instructions
