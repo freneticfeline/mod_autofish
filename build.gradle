@@ -13,7 +13,7 @@ buildscript {
 
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "1.10-1.2"
+version = "1.10-1.4"
 group= "net.unladenswallow.minecraft.autofish" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "mod_autofish_forge"
 
