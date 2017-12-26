@@ -6,7 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.projectile.EntityFishHook;
-import net.minecraft.init.Items;
+import net.minecraft.item.ItemFishingRod;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
@@ -42,6 +42,9 @@ public class AutoFishEventHandler {
         the movement method of detection. */
     private static final double MOTION_Y_THRESHOLD = -0.05d;
     
+    /** The number of ticks to set as the "catchable delay" when Fast Fishing is enabled. */
+    private static final int FAST_FISH_CATCHABLE_DELAY_TICKS = 42;
+    
     public AutoFishEventHandler() {
         this.minecraft = FMLClientHandler.instance().getClient();
     }
@@ -73,6 +76,10 @@ public class AutoFishEventHandler {
                     AutoFishLogger.info("Entity Clear detected.  Re-casting.");
                     this.isFishing = false;
                     startFishing();
+                }
+                
+                if (ModAutoFish.config_autofish_fastFishing && playerHookInWater() && !isDuringReelDelay()) {
+                    triggerBite();
                 }
                 
             } else {
@@ -150,7 +157,7 @@ public class AutoFishEventHandler {
         ItemStack heldItem = this.player.getHeldItemMainhand();
 
         return (heldItem != null
-                && heldItem.getItem() == Items.FISHING_ROD
+                && heldItem.getItem() instanceof ItemFishingRod
                 && heldItem.getItemDamage() <= heldItem.getMaxDamage());
     }
 
@@ -195,6 +202,27 @@ public class AutoFishEventHandler {
         }
         return false;
     }
+    
+    private void triggerBite() {
+        EntityPlayer serverPlayerEntity = getServerPlayerEntity();
+        if (serverPlayerEntity != null) {
+            /*
+             * If we are single player and have access to the server player entity, try to hack the fish hook entity
+             * to make fish bite sooner.
+             */
+            EntityFishHook serverFishEntity = serverPlayerEntity.fishEntity;
+            try {
+                int currentTicksCatchableDelay = getPrivateIntFieldFromObject(serverFishEntity, "ticksCatchableDelay", "field_146038_az");
+                if (currentTicksCatchableDelay == 0) {
+                    try {
+                        setPrivateIntFieldOfObject(serverFishEntity, "ticksCatchableDelay", "field_146038_az", FAST_FISH_CATCHABLE_DELAY_TICKS);
+                    } catch (Exception e) {
+                    }
+                }
+            } catch (Exception e) {
+            }
+        }
+    }
 
     /**
      * Using Java reflection APIs, access a private member data of type int
@@ -218,6 +246,27 @@ public class AutoFishEventHandler {
             return 0;
         }
             
+    }
+
+    /**
+     * Using Java reflection APIs, set a private member data of type int
+     * 
+     * @param object The target object
+     * @param fieldName The name of the private data field in object
+     * @param value The int value to set the private member data from object with fieldName
+     * 
+     */
+    private void setPrivateIntFieldOfObject(Object object, String forgeFieldName, String vanillaFieldName, int value) throws NoSuchFieldException, SecurityException, NumberFormatException, IllegalArgumentException, IllegalAccessException {
+        Field targetField = null;
+        try {
+            targetField = object.getClass().getDeclaredField(forgeFieldName);
+        } catch (NoSuchFieldException e) {
+            targetField = object.getClass().getDeclaredField(vanillaFieldName);
+        }
+        if (targetField != null) {
+            targetField.setAccessible(true);
+            targetField.set(object, value);
+        }
     }
 
     private EntityPlayer getServerPlayerEntity() {
@@ -244,7 +293,7 @@ public class AutoFishEventHandler {
         for (int i = 0; i < 9; i++) {
             ItemStack curItemStack = inventory.mainInventory.get(i);
             if (curItemStack != null 
-                    && curItemStack.getItem() == Items.FISHING_ROD
+                    && curItemStack.getItem() instanceof ItemFishingRod
                     && (!ModAutoFish.config_autofish_preventBreak || (curItemStack.getMaxDamage() - curItemStack.getItemDamage() > AUTOFISH_BREAKPREVENT_THRESHOLD))
                 ) {
                 inventory.currentItem = i;

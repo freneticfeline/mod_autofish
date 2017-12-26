@@ -23,6 +23,8 @@ public class ModAutoFish {
     public static final boolean CONFIG_DEFAULT_AUTOFISH_ENTITYCLEARPROTECT = false;
     public static int config_autofish_recastDelay;
     public static final int CONFIG_DEFAULT_AUTOFISH_RECASTDELAY = 2;
+    public static boolean config_autofish_fastFishing;
+    public static final boolean CONFIG_DEFAULT_AUTOFISH_FASTFISHING = false;
     
     @SidedProxy(clientSide="net.unladenswallow.minecraft.autofish.ClientProxy", serverSide="net.unladenswallow.minecraft.autofish.ServerProxy")
     public static CommonProxy proxy;
@@ -50,6 +52,7 @@ public class ModAutoFish {
         config_autofish_preventBreak = configFile.getBoolean("Enable Break Protection", Configuration.CATEGORY_GENERAL, CONFIG_DEFAULT_AUTOFISH_PREVENTBREAK, "Stop fishing or switch to a new rod before the current rod breaks.");
         config_autofish_entityClearProtect = configFile.getBoolean("Enable Enity Clear Protection", Configuration.CATEGORY_GENERAL, CONFIG_DEFAULT_AUTOFISH_ENTITYCLEARPROTECT, "Re-cast after the server clears entities. EXPERIMENTAL");
         config_autofish_recastDelay = configFile.getInt("Re-Cast Delay", Configuration.CATEGORY_GENERAL, CONFIG_DEFAULT_AUTOFISH_RECASTDELAY, 1, 10, "Time (in seconds) to wait before automatically re-casting. Increase this value if server lag causes re-casting to fail.");
+        config_autofish_fastFishing = configFile.getBoolean("Fast Fishing", Configuration.CATEGORY_GENERAL, CONFIG_DEFAULT_AUTOFISH_FASTFISHING, "(Single Player Only) Fish will bite right after casting.");
         
         if (configFile.hasChanged()) {
             configFile.save();
