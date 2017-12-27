@@ -1,20 +1,33 @@
 package net.unladenswallow.minecraft.autofish;
 
 import java.lang.reflect.Field;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import com.google.common.base.Predicate;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.item.ItemFishingRod;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
+import net.minecraftforge.fml.server.FMLServerHandler;
 
 public class AutoFishEventHandler {
 
@@ -29,11 +42,11 @@ public class AutoFishEventHandler {
 
     /** How long to suppress checking for a bite after starting to reel in.  If we check for a bite while reeling
         in, we may think we have a bite and try to reel in again, which will actually cause a re-cast and lose the fish */
-    private static final int REEL_TICK_DELAY = 5;
+    private static final int REEL_TICK_DELAY = 15;
 
     /** How long to wait after casting to check for Entity Clear.  If we check too soon, the hook entity
         isn't in the world yet, and will trigger a false alarm and cause infinite recasting. */
-    private static final int CAST_TICK_DELAY = 5;
+    private static final int CAST_TICK_DELAY = 10;
 
     /** When Break Prevention is enabled, how low to let the durability get before stopping or switching rods */
     private static final int AUTOFISH_BREAKPREVENT_THRESHOLD = 2;
@@ -48,14 +61,31 @@ public class AutoFishEventHandler {
     public AutoFishEventHandler() {
         this.minecraft = FMLClientHandler.instance().getClient();
     }
+
+    @SubscribeEvent
+    public void onServerTickEvent(ServerTickEvent event) {
+        /*
+         * Easter Egg:  Perform the Fast Fishing on the server event and apply to
+         * all players, so that it will also affect all players that join a single player game that has
+         * been opened to LAN play.
+         */
+        if (ModAutoFish.config_autofish_fastFishing && event.phase == Phase.END) {
+            MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+            if (server != null) {
+                for (WorldServer world : server.worlds) {
+                    triggerBites(world);
+                }
+            }
+        }
+    }
     
     @SubscribeEvent
     public void onClientTickEvent(ClientTickEvent event) {
         if (ModAutoFish.config_autofish_enable && !this.minecraft.isGamePaused() && this.minecraft.player != null) {
             this.player = this.minecraft.player;
 
-            if (playerIsHoldingRod()) {
-                if (playerHookInWater() && !isDuringReelDelay() && isFishBiting()) {
+            if (playerIsHoldingRod() || waitingToRecast()) {
+                if (playerHookInWater(this.player) && !isDuringReelDelay() && isFishBiting()) {
                     startReelDelay();
                     reelIn();
                     scheduleNextCast();
@@ -66,8 +96,6 @@ public class AutoFishEventHandler {
                     if (playerCanCast()) {
                         startFishing();
                     }
-                    // Resetting these values is not strictly necessary, but will improve the performance
-                    // of the check that potentially occurs every tick.
                     resetReelDelay();
                     resetCastSchedule();
                 }
@@ -78,10 +106,15 @@ public class AutoFishEventHandler {
                     startFishing();
                 }
                 
+                /*
+                 * This method works, but has been disabled in favor of the method that affects all
+                 * players in the single-player world.
+                 * See onServerTickEvent()
+                 * 
                 if (ModAutoFish.config_autofish_fastFishing && playerHookInWater() && !isDuringReelDelay()) {
                     triggerBite();
                 }
-                
+                */                
             } else {
                 this.isFishing = false;
             }
@@ -148,9 +181,9 @@ public class AutoFishEventHandler {
         return (this.startedCastDelayAt != 0 && this.minecraft.world.getTotalWorldTime() < this.startedCastDelayAt + CAST_TICK_DELAY);
     }
     
-    private boolean playerHookInWater() {
-        return this.player.fishEntity != null
-                && this.player.fishEntity.isInWater();
+    private boolean playerHookInWater(EntityPlayer player) {
+        return player.fishEntity != null
+                && player.fishEntity.isInWater();
     }
 
     private boolean playerIsHoldingRod() {
@@ -203,6 +236,33 @@ public class AutoFishEventHandler {
         return false;
     }
     
+    /**
+     * For all players in the specified world, if they are fishing, trigger a bite.
+     * 
+     * @param world
+     */
+    private void triggerBites(World world) {
+        if (!world.isRemote) {
+            Predicate<EntityPlayer> p_true = new Predicate<EntityPlayer>() {
+                public boolean apply(@Nullable EntityPlayer p_apply_1_)
+                {
+                    return true;
+                }
+            };
+            List<EntityPlayer> allPlayers = world.getPlayers(EntityPlayer.class, p_true);
+            for (EntityPlayer player : allPlayers) {
+                if (playerHookInWater(player)) {
+                    setTicksCatchableDelay(player.fishEntity, FAST_FISH_CATCHABLE_DELAY_TICKS);
+                }
+            }
+        }
+    }
+    
+    /**
+     * [Currently unused]
+     * For the current player, trigger a bite on the fish hook.
+     * 
+     */
     private void triggerBite() {
         EntityPlayer serverPlayerEntity = getServerPlayerEntity();
         if (serverPlayerEntity != null) {
@@ -221,6 +281,19 @@ public class AutoFishEventHandler {
                 }
             } catch (Exception e) {
             }
+        }
+    }
+    
+    private void setTicksCatchableDelay(EntityFishHook hook, int ticks) {
+        try {
+            int currentTicksCatchableDelay = getPrivateIntFieldFromObject(hook, "ticksCatchableDelay", "field_146038_az");
+            if (currentTicksCatchableDelay == 0) {
+                try {
+                    setPrivateIntFieldOfObject(hook, "ticksCatchableDelay", "field_146038_az", ticks);
+                } catch (Exception e) {
+                }
+            }
+        } catch (Exception e) {
         }
     }
 
@@ -286,6 +359,10 @@ public class AutoFishEventHandler {
     
     private boolean isTimeToCast() {
         return (this.castScheduledAt != 0 && this.minecraft.world.getTotalWorldTime() > this.castScheduledAt + (ModAutoFish.config_autofish_recastDelay * TICKS_PER_SECOND));
+    }
+    
+    private boolean waitingToRecast() {
+        return (this.castScheduledAt > 0);
     }
 
     private void tryToSwitchRods() {
