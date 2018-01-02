@@ -79,12 +79,12 @@ public class AutoFishLogger {
         log(Level.INFO, format, data);
     }
 
-    public static void fine(String format, Object... data)
+    public static void debug(String format, Object... data)
     {
         log(Level.DEBUG, format, data);
     }
 
-    public static void finer(String format, Object... data)
+    public static void trace(String format, Object... data)
     {
         log(Level.TRACE, format, data);
     }
