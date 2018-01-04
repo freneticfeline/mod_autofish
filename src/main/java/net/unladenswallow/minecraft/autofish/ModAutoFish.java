@@ -10,9 +10,12 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.unladenswallow.minecraft.autofish.events.EventListener;
+import net.unladenswallow.minecraft.autofish.proxy.CommonProxy;
+import net.unladenswallow.minecraft.autofish.util.Logger;
 
 @Mod(modid = ModAutoFish.MODID, useMetadata = true, acceptedMinecraftVersions="[1.12,1.13)", acceptableRemoteVersions="[1.12,1.13)",
-guiFactory = "net.unladenswallow.minecraft.autofish.AutoFishGuiFactory")
+guiFactory = "net.unladenswallow.minecraft.autofish.GuiFactory")
 public class ModAutoFish {
     public static final String MODID = "mod_autofish";
     
@@ -48,7 +51,8 @@ public class ModAutoFish {
     @SidedProxy(clientSide="net.unladenswallow.minecraft.autofish.ClientProxy", serverSide="net.unladenswallow.minecraft.autofish.ServerProxy")
     public static CommonProxy proxy;
     
-    public static AutoFishEventHandler eventHandler = new AutoFishEventHandler();
+    public static AutoFish autoFish = new AutoFish();
+    public static EventListener eventListener = new EventListener(autoFish);
     
     public static ModAutoFish instance = new ModAutoFish();
             
@@ -63,7 +67,7 @@ public class ModAutoFish {
     
     @EventHandler
     public void init (FMLInitializationEvent event) {
-        AutoFishLogger.info("Initializing " + ModAutoFish.MODID);
+        Logger.info("Initializing " + ModAutoFish.MODID);
         ModAutoFish.proxy.init(event);
     }
 

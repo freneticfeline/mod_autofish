@@ -1,14 +1,15 @@
-package net.unladenswallow.minecraft.autofish;
+package net.unladenswallow.minecraft.autofish.events;
 
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
+import net.minecraft.item.ItemFishingRod;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
+import net.unladenswallow.minecraft.autofish.gui.ConfigGui;
 
 public class KeyInputHandler {
 
@@ -28,7 +29,7 @@ public class KeyInputHandler {
         if (this.options.isPressed()) {
             EntityPlayer player = Minecraft.getMinecraft().player;
             if (playerIsHoldingFishingRod(player)) {
-                Minecraft.getMinecraft().displayGuiScreen(new AutoFishConfigGui(Minecraft.getMinecraft().currentScreen));
+                Minecraft.getMinecraft().displayGuiScreen(new ConfigGui(Minecraft.getMinecraft().currentScreen));
             }
         }
     }
@@ -37,7 +38,7 @@ public class KeyInputHandler {
         return (!Minecraft.getMinecraft().isGamePaused()
                 && player != null
                 && player.getHeldItemMainhand() != null
-                && player.getHeldItemMainhand().getItem() == Items.FISHING_ROD);
+                && player.getHeldItemMainhand().getItem() instanceof ItemFishingRod);
     }
     
 }

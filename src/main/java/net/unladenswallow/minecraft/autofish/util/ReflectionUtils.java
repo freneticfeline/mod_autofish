@@ -1,4 +1,4 @@
-package net.unladenswallow.minecraft.autofish;
+package net.unladenswallow.minecraft.autofish.util;
 
 import java.lang.reflect.Field;
 
