@@ -51,7 +51,7 @@ your enchanted fishing rods.
 Time (in seconds) to wait before automatically re-casting. Increase this value if server lag causes
 re-casting to fail.
 
-### Enable Enity Clear Protection
+### Enable Entity Clear Protection
 When playing on a server, re-cast after the server clears entities.  Useful if you are playing on a
 server that periodically deletes all entities (including fishing hooks) from the world, which causes
 you to stop fishing.
