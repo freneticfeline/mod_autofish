@@ -37,29 +37,29 @@ standard Minecraft **Controls** screen.
 ## Configuration Options
 
 ### Enable AutoFish
-Automatically reel in and re-cast when a fish nibbles the hook.  If this is set to **false**, all mod
+Automatically reel in and re-cast when a fish nibbles the hook. If set to false, all other AutoFish
 functionality is disabled.
 
 ### Enable MultiRod
 Automatically switch to a new fishing rod when the current rod breaks, if one is available in the hotbar.
 
 ### Enable Break Protection
-Stop fishing (or switch to a new rod if MultiRod is enabled and another rod is available) before the
-current rod breaks.  Useful if you want to repair your enchanted fishing rods.
+Stop fishing or switch to a new rod just before the current rod breaks.  Useful if you want to repair
+your enchanted fishing rods.
 
 ### Re-Cast Delay
-Time (in seconds) to wait before automatically re-casting.  Increase this value if server lag causes
+Time (in seconds) to wait before automatically re-casting. Increase this value if server lag causes
 re-casting to fail.
 
-### Enable Entity Clear Protection
-When playing on a server, re-cast after the server clears entities.  Useful if you are playing on a server
-that periodically deletes all entities (including fishing hooks) from the world, which causes you to
-stop fishing.
+### Enable Enity Clear Protection
+When playing on a server, re-cast after the server clears entities.  Useful if you are playing on a
+server that periodically deletes all entities (including fishing hooks) from the world, which causes
+you to stop fishing.
 
-### Aggressive Bite Detection
+### Enable Aggressive Bite Detection
 When playing on a server, be more aggressive about detecting fish bites.  Improves multiplayer bite
-detection from ~85% to ~95%, but false positives will be more likely, especially if other players
-are fishing very close by.
+detection from ~85% to ~95%, but false positives will be more likely, especially if other players are
+fishing very close by.
 
 ### Handle Problems
 [HAS SIDE EFFECTS] Re-cast when problems detected (e.g. if not in water or if a MOB has been hooked).

@@ -1,3 +1,7 @@
+1.12-1.7
+========
+Slightly improved bite detection for multiplayer with option to be even more aggressive.
+
 1.12-1.6
 ========
 Fixed bug: Multirod switching sometimes fails when Break Protection is off
