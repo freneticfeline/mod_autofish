@@ -15,7 +15,7 @@ import net.unladenswallow.minecraft.autofish.proxy.CommonProxy;
 import net.unladenswallow.minecraft.autofish.util.Logger;
 
 @Mod(modid = ModAutoFish.MODID, useMetadata = true, acceptedMinecraftVersions="[1.12,1.13)", acceptableRemoteVersions="[1.12,1.13)",
-guiFactory = "net.unladenswallow.minecraft.autofish.GuiFactory")
+guiFactory = "net.unladenswallow.minecraft.autofish.gui.GuiFactory")
 public class ModAutoFish {
     public static final String MODID = "mod_autofish";
     
@@ -48,7 +48,7 @@ public class ModAutoFish {
             "Enable Fast Fishing"
     }));
     
-    @SidedProxy(clientSide="net.unladenswallow.minecraft.autofish.ClientProxy", serverSide="net.unladenswallow.minecraft.autofish.ServerProxy")
+    @SidedProxy(clientSide="net.unladenswallow.minecraft.autofish.proxy.ClientProxy", serverSide="net.unladenswallow.minecraft.autofish.proxy.ServerProxy")
     public static CommonProxy proxy;
     
     public static AutoFish autoFish = new AutoFish();
