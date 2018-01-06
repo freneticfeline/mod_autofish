@@ -136,12 +136,6 @@ public class EventListener implements IWorldEventListener {
     }
 
     @Override
-    public void spawnParticle(int id, boolean ignoreRange, boolean p_190570_3_, double x, double y, double z,
-            double xSpeed, double ySpeed, double zSpeed, int... parameters) {
-        spawnParticle(id, ignoreRange, x, y, z, xSpeed, ySpeed, zSpeed, parameters);
-    }
-
-    @Override
     public void onEntityAdded(Entity entityIn) {
         if (ModAutoFish.config_autofish_enable && entityIn instanceof EntityXPOrb) {
             _autoFish.onXpOrbAdded(entityIn.posX, entityIn.posY, entityIn.posZ);

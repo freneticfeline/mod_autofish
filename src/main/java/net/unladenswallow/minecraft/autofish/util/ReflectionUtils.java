@@ -29,6 +29,30 @@ public class ReflectionUtils {
     }
 
     /**
+     * Using Java reflection APIs, access a private member data of type double
+     * 
+     * @param object The target object
+     * @param fieldName The name of the private data field in object
+     * 
+     * @return The double value of the private member data from object with fieldName
+     */
+    public static double getPrivateDoubleFieldFromObject(Object object, String forgeFieldName, String vanillaFieldName) throws NoSuchFieldException, SecurityException, NumberFormatException, IllegalArgumentException, IllegalAccessException {
+        Field targetField = null;
+        try {
+            targetField = object.getClass().getDeclaredField(forgeFieldName);
+        } catch (NoSuchFieldException e) {
+            targetField = object.getClass().getDeclaredField(vanillaFieldName);
+        }
+        if (targetField != null) {
+            targetField.setAccessible(true);
+            return Double.valueOf(targetField.get(object).toString()).doubleValue();
+        } else {
+            return 0;
+        }
+            
+    }
+
+    /**
      * Using Java reflection APIs, set a private member data of type int
      * 
      * @param object The target object
