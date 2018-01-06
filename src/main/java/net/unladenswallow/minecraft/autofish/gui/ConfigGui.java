@@ -1,13 +1,14 @@
-package net.unladenswallow.minecraft.autofish;
+package net.unladenswallow.minecraft.autofish.gui;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.config.GuiConfig;
+import net.unladenswallow.minecraft.autofish.ModAutoFish;
 
-public class AutoFishConfigGui extends GuiConfig {
+public class ConfigGui extends GuiConfig {
 
-    public AutoFishConfigGui(GuiScreen parent) {
+    public ConfigGui(GuiScreen parent) {
         super(parent,
             new ConfigElement(ModAutoFish.configFile.getCategory(Configuration.CATEGORY_GENERAL)).getChildElements(),
             ModAutoFish.MODID, false, false, "AutoFish Forge Mod Options"

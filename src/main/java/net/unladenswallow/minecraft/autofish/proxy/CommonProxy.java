@@ -1,4 +1,4 @@
-package net.unladenswallow.minecraft.autofish;
+package net.unladenswallow.minecraft.autofish.proxy;
 
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
