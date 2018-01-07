@@ -14,7 +14,7 @@ import net.unladenswallow.minecraft.autofish.events.EventListener;
 import net.unladenswallow.minecraft.autofish.proxy.CommonProxy;
 import net.unladenswallow.minecraft.autofish.util.Logger;
 
-@Mod(modid = ModAutoFish.MODID, useMetadata = true, acceptedMinecraftVersions="[1.10,1.11)", acceptableRemoteVersions="[1.10,1.11)",
+@Mod(modid = ModAutoFish.MODID, useMetadata = true, acceptedMinecraftVersions="[1.9,1.10)", acceptableRemoteVersions="[1.9,1.10)",
 guiFactory = "net.unladenswallow.minecraft.autofish.gui.GuiFactory")
 public class ModAutoFish {
     public static final String MODID = "mod_autofish";

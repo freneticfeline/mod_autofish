@@ -74,7 +74,7 @@ public class EventListener implements IWorldEventListener {
      */
     @SubscribeEvent
     public void onPlaySoundEvent(PlaySoundEvent event) {
-        if (ModAutoFish.config_autofish_enable && SoundEvents.ENTITY_BOBBER_SPLASH.getSoundName() == event.getSound().getSoundLocation()) {
+        if (ModAutoFish.config_autofish_enable && SoundEvents.entity_bobber_splash.getSoundName() == event.getSound().getSoundLocation()) {
             _autoFish.onBobberSplashDetected(event.getSound().getXPosF(), event.getSound().getYPosF(), event.getSound().getZPosF());
         }
     }
@@ -167,8 +167,9 @@ public class EventListener implements IWorldEventListener {
     public void broadcastSound(int soundID, BlockPos pos, int data) {}
 
     @Override
-    public void playEvent(EntityPlayer player, int type, BlockPos blockPosIn, int data) {}
+    public void sendBlockBreakProgress(int breakerId, BlockPos pos, int progress) {}
+
 
     @Override
-    public void sendBlockBreakProgress(int breakerId, BlockPos pos, int progress) {}
+    public void playAuxSFX(EntityPlayer player, int sfxType, BlockPos blockPosIn, int data) {}
 }
