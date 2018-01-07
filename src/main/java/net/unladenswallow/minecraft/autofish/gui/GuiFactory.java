@@ -1,4 +1,4 @@
-package net.unladenswallow.minecraft.autofish;
+package net.unladenswallow.minecraft.autofish.gui;
 
 import java.util.Set;
 
@@ -6,7 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fml.client.IModGuiFactory;
 
-public class AutoFishGuiFactory implements IModGuiFactory {
+public class GuiFactory implements IModGuiFactory {
 
     @Override
     public void initialize(Minecraft minecraftInstance) {
@@ -15,9 +15,18 @@ public class AutoFishGuiFactory implements IModGuiFactory {
     }
 
     @Override
+    public boolean hasConfigGui() {
+        return true;
+    }
+
+    @Override
+    public GuiScreen createConfigGui(GuiScreen parentScreen) {
+        return new ConfigGui(parentScreen);
+    }
+
+    @Override
     public Class<? extends GuiScreen> mainConfigGuiClass() {
-        // TODO Auto-generated method stub
-        return AutoFishConfigGui.class;
+        return ConfigGui.class;
     }
 
     @Override
@@ -31,5 +40,6 @@ public class AutoFishGuiFactory implements IModGuiFactory {
         // TODO Auto-generated method stub
         return null;
     }
+
 
 }

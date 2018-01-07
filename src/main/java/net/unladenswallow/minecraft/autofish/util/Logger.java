@@ -1,29 +1,28 @@
-package net.unladenswallow.minecraft.autofish;
+package net.unladenswallow.minecraft.autofish.util;
 
 import java.io.File;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
- * Custom Logger for ModEmeraldMaterial.  Copied and modified from FMLRelaunchLog.
+ * Custom Logger for ModAutoFish.  Copied and modified from FMLRelaunchLog.
  * @author FreneticFeline
  *
  */
-public class AutoFishLogger {
+public class Logger {
     /**
      * Our special logger for logging issues to. We copy various assets from the
      * Minecraft logger to achieve a similar appearance.
      */
-    public static AutoFishLogger log = new AutoFishLogger();
+    public static Logger log = new Logger();
 
     static File minecraftHome;
     private static boolean configured;
 
-    private Logger myLog;
+    private org.apache.logging.log4j.Logger myLog;
 
-    private AutoFishLogger()
+    private Logger()
     {
     }
 
@@ -79,17 +78,17 @@ public class AutoFishLogger {
         log(Level.INFO, format, data);
     }
 
-    public static void fine(String format, Object... data)
+    public static void debug(String format, Object... data)
     {
         log(Level.DEBUG, format, data);
     }
 
-    public static void finer(String format, Object... data)
+    public static void trace(String format, Object... data)
     {
         log(Level.TRACE, format, data);
     }
 
-    public Logger getLogger()
+    public org.apache.logging.log4j.Logger getLogger()
     {
         return myLog;
     }
