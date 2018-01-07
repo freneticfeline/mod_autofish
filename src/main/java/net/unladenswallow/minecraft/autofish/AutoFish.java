@@ -9,12 +9,11 @@ import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.item.ItemFishingRod;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.WorldServer;
+import net.minecraft.util.MathHelper;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.unladenswallow.minecraft.autofish.util.Logger;
@@ -116,6 +115,7 @@ public class AutoFish {
 //                double yDifference = Math.abs(hook.posY - y);
             // Ignore Y component when calculating distance from hook
             double xzDistanceFromHook = hook.getDistanceSq(x, hook.posY, z);
+//            Logger.info("[%d] BOBBER_SPLASH at distance %f", this.minecraftClient.theWorld.getTotalWorldTime(), xzDistanceFromHook);
             if (xzDistanceFromHook <= CLOSE_BOBBER_SPLASH_THRESHOLD) {
 //                    AutoFishLogger.info("[%d] Close bobber splash at %f /  %f", this.minecraft.theWorld.getTotalWorldTime(), xzDistanceFromHook, yDifference);
                 this.closeBobberSplashDetectedAt = this.minecraftClient.theWorld.getTotalWorldTime();
@@ -428,7 +428,7 @@ public class AutoFish {
     }
     
     private boolean playerIsHoldingRod() {
-        ItemStack heldItem = this.player.getHeldItemMainhand();
+        ItemStack heldItem = this.player.getHeldItem();
 
         return (heldItem != null
                 && heldItem.getItem() instanceof ItemFishingRod
@@ -491,8 +491,10 @@ public class AutoFish {
         if (!playerIsHoldingRod()) {
             return false;
         }
-        ItemStack heldItemStack = this.player.getHeldItemMainhand();
-        return this.player.getHeldItemMainhand().getItem().getPropertyGetter(new ResourceLocation("cast")).apply(heldItemStack, this.minecraftClient.theWorld, this.player) > 0F;
+        return (this.player.fishEntity != null);
+//        ItemStack heldItemStack = this.player.getHeldItem();
+//        Logger.info("fising_rod is %s", heldItemStack.getItem().get);
+//        return heldItemStack.getItem().getMetadata(heldItemStack) == 1;
     }
     
     private boolean needToSwitchRods() {
@@ -511,7 +513,7 @@ public class AutoFish {
         if (!playerIsHoldingRod()) {
             return false;
         } else {
-            ItemStack heldItem = this.player.getHeldItemMainhand();
+            ItemStack heldItem = this.player.getHeldItem();
     
             return (!ModAutoFish.config_autofish_preventBreak 
                     || (heldItem.getMaxDamage() - heldItem.getItemDamage() > AUTOFISH_BREAKPREVENT_THRESHOLD)
@@ -524,7 +526,7 @@ public class AutoFish {
 
     
     private void showNotificationToPlayer() {
-        this.player.addChatMessage(new TextComponentString(NOTIFICATION_TEXT_AUTOFISH_ENABLED));
+        this.player.addChatMessage(new ChatComponentText(NOTIFICATION_TEXT_AUTOFISH_ENABLED));
         this.notificationShownToPlayer = true;
     }
     
@@ -585,10 +587,12 @@ public class AutoFish {
     public void triggerBites() {
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
         if (server != null) {
-            for (EntityPlayer player : server.getPlayerList().getPlayerList()) {
-                if (playerHookInWater(player)) {
-                    int ticks = FAST_FISH_CATCHABLE_DELAY_TICKS + MathHelper.getRandomIntegerInRange(this.rand, 0, FAST_FISH_DELAY_VARIANCE);
-                    setTicksCatchableDelay(player.fishEntity, ticks);
+            for (WorldServer worldServer : server.worldServers) {
+                for (EntityPlayer player : worldServer.playerEntities) {
+                    if (playerHookInWater(player)) {
+                        int ticks = FAST_FISH_CATCHABLE_DELAY_TICKS + MathHelper.getRandomIntegerInRange(this.rand, 0, FAST_FISH_DELAY_VARIANCE);
+                        setTicksCatchableDelay(player.fishEntity, ticks);
+                    }
                 }
             }
         }
@@ -634,12 +638,13 @@ public class AutoFish {
         }
     }
 
-    private EnumActionResult playerUseRod() {
-        return this.minecraftClient.playerController.processRightClick(
+    private void playerUseRod() {
+        this.minecraftClient.playerController.sendUseItem(
                 this.player, 
                 this.minecraftClient.theWorld, 
-                this.player.getHeldItemMainhand(),
-                EnumHand.MAIN_HAND);
+                this.player.getHeldItem());
+        // in 1.8, this does not trigger a PlayerInteractEvent, so we need to call our handler manually
+        onPlayerUseItem();
     }
     
     
