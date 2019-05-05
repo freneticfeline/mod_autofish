@@ -1,6 +1,7 @@
 package net.unladenswallow.minecraft.autofish.events;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
@@ -74,7 +75,7 @@ public class EventListener implements IWorldAccess {
      */
     @SubscribeEvent
     public void onPlaySoundEvent(PlaySoundEvent event) {
-        if (ModAutoFish.config_autofish_enable && BOBBER_SPLASH_SOUND_NAME == event.name) {
+        if (ModAutoFish.config_autofish_enable && BOBBER_SPLASH_SOUND_NAME.equals(event.name)) {
             _autoFish.onBobberSplashDetected(event.sound.getXPosF(), event.sound.getYPosF(), event.sound.getZPosF());
         }
     }
