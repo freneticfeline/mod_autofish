@@ -5,3 +5,6 @@
 /eclipse/
 /.project
 /.classpath
+/run
+/*Client.launch
+/*Server.launch
