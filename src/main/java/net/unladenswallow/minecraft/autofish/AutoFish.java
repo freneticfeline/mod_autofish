@@ -1,7 +1,11 @@
 package net.unladenswallow.minecraft.autofish;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Random;
 
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -15,8 +19,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraft.world.dimension.DimensionType;
+import net.unladenswallow.minecraft.autofish.config.AutoFishModConfig;
 import net.unladenswallow.minecraft.autofish.util.Logger;
 import net.unladenswallow.minecraft.autofish.util.ReflectionUtils;
 
@@ -94,7 +98,7 @@ public class AutoFish {
     
     
     public AutoFish() {
-        this.minecraftClient = FMLClientHandler.instance().getClient();
+        this.minecraftClient = Minecraft.getInstance();
         this.rand = new Random();
     }
 
@@ -116,11 +120,11 @@ public class AutoFish {
             // Ignore Y component when calculating distance from hook
             double xzDistanceFromHook = hook.getDistanceSq(x, hook.posY, z);
             if (xzDistanceFromHook <= CLOSE_BOBBER_SPLASH_THRESHOLD) {
-//                    AutoFishLogger.info("[%d] Close bobber splash at %f /  %f", this.minecraft.world.getTotalWorldTime(), xzDistanceFromHook, yDifference);
-                this.closeBobberSplashDetectedAt = this.minecraftClient.world.getTotalWorldTime();
+//                    AutoFishLogger.info("[%d] Close bobber splash at %f /  %f", getGameTime(), xzDistanceFromHook, yDifference);
+                this.closeBobberSplashDetectedAt = getGameTime();
 //                    if (xzDistanceFromHook <= EXACT_BOBBER_SPLASH_THRESHOLD) {
-//    //                    AutoFishLogger.info("[%d] Exact bobber splash at %f /  %f", this.minecraft.world.getTotalWorldTime(), xzDistanceFromHook, yDifference);
-//                        this.exactBobberSplashDetectedAt = this.minecraft.world.getTotalWorldTime();
+//    //                    AutoFishLogger.info("[%d] Exact bobber splash at %f /  %f", getGameTime(), xzDistanceFromHook, yDifference);
+//                        this.exactBobberSplashDetectedAt = getGameTime();
 //                    } 
             }
         }
@@ -145,6 +149,8 @@ public class AutoFish {
                 // Player is reeling in
                 this.isFishing = false;
                 resetCastDelay();
+                // Bug in Forge that doesn't delete the fishing hook entity
+                this.player.fishEntity = null;
             }
         }
     }
@@ -163,13 +169,13 @@ public class AutoFish {
             double distanceFromHook = new BlockPos(x, y, z).distanceSq(hook.posX, hook.posY, hook.posZ);
             if (distanceFromHook <= CLOSE_WATER_WAKE_THRESHOLD) {
                 if (this.closeWaterWakeDetectedAt <= 0) {
-//                    AutoFishLogger.info("[%d] Close water wake at %f", this.minecraft.world.getTotalWorldTime(), distanceFromHook);
-                    this.closeWaterWakeDetectedAt = this.minecraftClient.world.getTotalWorldTime();
+//                    AutoFishLogger.info("[%d] Close water wake at %f", getGameTime(), distanceFromHook);
+                    this.closeWaterWakeDetectedAt = getGameTime();
                 }
 //                if (distanceFromHook <= EXACT_WATER_WAKE_THRESHOLD) {
 //                    if (this.exactWaterWakeDetectedAt <=0) {
-////                        AutoFishLogger.info("[%d] Exact water wake at %f", this.minecraft.world.getTotalWorldTime(), distanceFromHook);
-//                        this.exactWaterWakeDetectedAt = this.minecraft.world.getTotalWorldTime();
+////                        AutoFishLogger.info("[%d] Exact water wake at %f", getGameTime(), distanceFromHook);
+//                        this.exactWaterWakeDetectedAt = getGameTime();
 //                    }
 //                }
             }
@@ -190,7 +196,7 @@ public class AutoFish {
             double distanceFromPlayer = this.player.getPosition().distanceSq(x, y, z);
 //            AutoFishLogger.info("Entity [%s] spawned at distance %f from player", entity.getDisplayName().getFormattedText(), distanceFromPlayer);
             if (distanceFromPlayer < 2.0d) {
-                this.xpLastAddedAt = this.minecraftClient.world.getTotalWorldTime();
+                this.xpLastAddedAt = getGameTime();
             }
         }
     }
@@ -232,7 +238,7 @@ public class AutoFish {
                     resetBiteTracking();
                 }
                 
-                if (ModAutoFish.config_autofish_entityClearProtect) {
+                if (AutoFishModConfig.CLIENT.config_autofish_entityClearProtect.get()) {
                     checkForEntityClear();
                 }
                 
@@ -276,7 +282,7 @@ public class AutoFish {
                 return isFishBiting_fromClientWorld();
             }
         } else {
-            /** If multiplayer, we must rely on client world conditions to guess when a bit occurs **/
+            /** If multiplayer, we must rely on client world conditions to guess when a bite occurs **/
             return isFishBiting_fromClientWorld();
         }
     }
@@ -334,8 +340,8 @@ public class AutoFish {
     
     private boolean isFishBiting_fromBobberSound() {
         /** If a bobber sound has been played at the fish hook, a fish is already biting **/
-        if (ModAutoFish.config_autofish_aggressiveBiteDetection && this.closeBobberSplashDetectedAt > 0) {
-            Logger.debug("[%d] Detected bite by BOBBER_SPLASH", this.minecraftClient.world.getTotalWorldTime());
+        if (AutoFishModConfig.CLIENT.config_autofish_aggressiveBiteDetection.get() && this.closeBobberSplashDetectedAt > 0) {
+            Logger.debug("[%d] Detected bite by BOBBER_SPLASH", getGameTime());
             return true;
         }
         return false;
@@ -343,10 +349,10 @@ public class AutoFish {
     
     private boolean isFishBiting_fromWaterWake() {
         /** An water wake indicates a probable bite "very soon", so make sure enough time has passed **/
-        if (ModAutoFish.config_autofish_aggressiveBiteDetection
+        if (AutoFishModConfig.CLIENT.config_autofish_aggressiveBiteDetection.get()
                 && this.closeWaterWakeDetectedAt > 0 
-                && this.minecraftClient.world.getTotalWorldTime() > this.closeWaterWakeDetectedAt + CLOSE_WATER_WAKE_DELAY_TICKS) {
-            Logger.debug("[%d] Detected bite by WATER_WAKE", this.minecraftClient.world.getTotalWorldTime());
+                && getGameTime() > this.closeWaterWakeDetectedAt + CLOSE_WATER_WAKE_DELAY_TICKS) {
+            Logger.debug("[%d] Detected bite by WATER_WAKE", getGameTime());
             return true;
         }
         return false;
@@ -359,7 +365,7 @@ public class AutoFish {
                 && fishEntity.motionX == 0 
                 && fishEntity.motionZ == 0 
                 && fishEntity.motionY < MOTION_Y_THRESHOLD) {
-            Logger.debug("[%d] Detected bite by MOVEMENT", this.minecraftClient.world.getTotalWorldTime());
+            Logger.debug("[%d] Detected bite by MOVEMENT", getGameTime());
             return true;
         }
         return false;
@@ -377,9 +383,9 @@ public class AutoFish {
                 && fishEntity.motionX == 0 
                 && fishEntity.motionZ == 0 
                 && fishEntity.motionY < MOTION_Y_MAYBE_THRESHOLD) {
-//            long totalWorldTime = this.minecraft.world.getTotalWorldTime();
+//            long totalWorldTime = getGameTime();
             if (recentCloseBobberSplash() || recentCloseWaterWake()) {
-                Logger.debug("[%d] Detected bite by ALL", this.minecraftClient.world.getTotalWorldTime());
+                Logger.debug("[%d] Detected bite by ALL", getGameTime());
                 return true;
             }
         }
@@ -391,30 +397,42 @@ public class AutoFish {
     
     
     private boolean isDuringReelDelay() {
-        return (this.startedReelDelayAt != 0 && this.minecraftClient.world.getTotalWorldTime() < this.startedReelDelayAt + REEL_TICK_DELAY);
+        return (this.startedReelDelayAt != 0 && getGameTime() < this.startedReelDelayAt + REEL_TICK_DELAY);
     }
     
     private boolean isDuringCastDelay() {
-        return (this.startedCastDelayAt != 0 && this.minecraftClient.world.getTotalWorldTime() < this.startedCastDelayAt + CAST_TICK_DELAY);
+        return (this.startedCastDelayAt != 0 && getGameTime() < this.startedCastDelayAt + CAST_TICK_DELAY);
     }
     
     private boolean playerHookInWater(EntityPlayer player) {
-        return player != null && player.fishEntity != null
-                && player.fishEntity.isInWater();
+        if (player == null || player.fishEntity == null) {
+            return false;
+        }
+        IBlockState hookBlockState = player.fishEntity.getEntityWorld().getBlockState(new BlockPos(player.fishEntity));
+        boolean hookIsInWater = hookBlockState.getMaterial() == Material.WATER;
+//        Logger.info("Hook %s in water", hookIsInWater ? "is" : "is not");
+//        Logger.info("Hook is at [x: %f, y: %f, z: %f", player.fishEntity.posX, player.fishEntity.posY, player.fishEntity.posZ);
+        return hookIsInWater;
+//        Logger.info("Hook %s in water", player != null && player.fishEntity != null
+//                && player.fishEntity.isInWater() ? "is" : "is not");
+//        return player != null && player.fishEntity != null
+//                && player.fishEntity.isInWater();
     }
 
     private boolean playerIsHoldingRod() {
-        ItemStack heldItem = this.player.getHeldItemMainhand();
-
-        return (heldItem != null
-                && heldItem.getItem() instanceof ItemFishingRod
-                && heldItem.getItemDamage() <= heldItem.getMaxDamage());
+        return findActiveFishingRod() != null;
+    }
+    
+    private boolean isUsableFishingRod(ItemStack itemStack) {
+        return (itemStack != null
+                && itemStack.getItem() instanceof ItemFishingRod
+                && itemStack.getDamage() <= itemStack.getMaxDamage());
     }
 
     private boolean recentCloseBobberSplash() {
         /** Close bobber sound must have been quite recent to indicate probable bite **/
         if (this.closeBobberSplashDetectedAt > 0 
-                && this.minecraftClient.world.getTotalWorldTime() < this.closeBobberSplashDetectedAt + 20) {
+                && getGameTime() < this.closeBobberSplashDetectedAt + 20) {
             return true;
         }
         return false;
@@ -423,18 +441,18 @@ public class AutoFish {
     private boolean recentCloseWaterWake() {
         /** A close water wake indicates probable bite "soon", so make sure enough time has passed **/
         if (this.closeWaterWakeDetectedAt > 0
-                && this.minecraftClient.world.getTotalWorldTime() > this.closeWaterWakeDetectedAt + CLOSE_WATER_WAKE_DELAY_TICKS) {
+                && getGameTime() > this.closeWaterWakeDetectedAt + CLOSE_WATER_WAKE_DELAY_TICKS) {
             return true;
         }
         return false;
     }
     private boolean somethingSeemsWrong() {
         if (rodIsCast() && !isDuringCastDelay() && !isDuringReelDelay() && hookShouldBeInWater()) {
-            if ((playerHookInWater(this.player) || ModAutoFish.config_autofish_handleProblems) && waitedLongEnough()) {
+            if ((playerHookInWater(this.player) || AutoFishModConfig.CLIENT.config_autofish_handleProblems.get()) && waitedLongEnough()) {
                 Logger.info("We should have caught something by now.");
                 return true;
             }
-            if (ModAutoFish.config_autofish_handleProblems) {
+            if (AutoFishModConfig.CLIENT.config_autofish_handleProblems.get()) {
                 if (hookedAnEntity()) {
                     Logger.info("Oops, we hooked an Entity");
                     return true;
@@ -456,27 +474,33 @@ public class AutoFish {
     }
     
     private boolean waitedLongEnough() {
-        return this.startedCastDelayAt > 0 && this.minecraftClient.world.getTotalWorldTime() > this.startedCastDelayAt + (MAX_WAITING_TIME_SECONDS * TICKS_PER_SECOND);
+        return this.startedCastDelayAt > 0 && getGameTime() > this.startedCastDelayAt + (MAX_WAITING_TIME_SECONDS * TICKS_PER_SECOND);
     }
     
     private boolean hookShouldBeInWater() {
-        return this.startedCastDelayAt > 0 && this.minecraftClient.world.getTotalWorldTime() > this.startedCastDelayAt + MAX_HOOK_FLYING_TIME_TICKS;
+        return this.startedCastDelayAt > 0 && getGameTime() > this.startedCastDelayAt + MAX_HOOK_FLYING_TIME_TICKS;
     }
     
     private boolean rodIsCast() {
         if (!playerIsHoldingRod()) {
             return false;
         }
-        ItemStack heldItemStack = this.player.getHeldItemMainhand();
-        return this.player.getHeldItemMainhand().getItem().getPropertyGetter(new ResourceLocation("cast")).apply(heldItemStack, this.minecraftClient.world, this.player) > 0F;
+        ItemStack activeFishingRod = findActiveFishingRod();
+//        Logger.info("cast property: %f", activeFishingRod.getItem().getPropertyGetter(new ResourceLocation("cast")).call(activeFishingRod, this.minecraftClient.world, this.player));
+        return activeFishingRod.getItem().getPropertyGetter(new ResourceLocation("cast")).call(activeFishingRod, this.minecraftClient.world, this.player) > 0F;
+//        Logger.info("Rod %s cast.", this.rodIsCast ? "is" : "is not");
+//        return this.rodIsCast;
     }
     
     private boolean needToSwitchRods() {
-        return ModAutoFish.config_autofish_multirod && !playerCanCast();
+        return AutoFishModConfig.CLIENT.config_autofish_multirod.get() && !playerCanCast();
     }
 
     private boolean isTimeToCast() {
-        return (this.castScheduledAt > 0 && this.minecraftClient.world.getTotalWorldTime() > this.castScheduledAt + (ModAutoFish.config_autofish_recastDelay * TICKS_PER_SECOND));
+        if (this.castScheduledAt > 0 && getGameTime() > this.castScheduledAt + (AutoFishModConfig.CLIENT.config_autofish_recastDelay.get() * TICKS_PER_SECOND)) {
+            Logger.info("Time to Cast!  castScheduledAt: %d; gameTime: %d; delay: %d", this.castScheduledAt, getGameTime(), (AutoFishModConfig.CLIENT.config_autofish_recastDelay.get() * TICKS_PER_SECOND));
+        }
+        return (this.castScheduledAt > 0 && getGameTime() > this.castScheduledAt + (AutoFishModConfig.CLIENT.config_autofish_recastDelay.get() * TICKS_PER_SECOND));
     }
     
     private boolean waitingToRecast() {
@@ -487,12 +511,22 @@ public class AutoFish {
         if (!playerIsHoldingRod()) {
             return false;
         } else {
-            ItemStack heldItem = this.player.getHeldItemMainhand();
+            ItemStack activeFishingRod = findActiveFishingRod();
+            if (activeFishingRod == null) {
+                return false;
+            }
     
-            return (!ModAutoFish.config_autofish_preventBreak 
-                    || (heldItem.getMaxDamage() - heldItem.getItemDamage() > AUTOFISH_BREAKPREVENT_THRESHOLD)
+            return (!AutoFishModConfig.CLIENT.config_autofish_preventBreak.get() 
+                    || (activeFishingRod.getMaxDamage() - activeFishingRod.getDamage() > AUTOFISH_BREAKPREVENT_THRESHOLD)
                     );
         }
+    }
+    
+    private ItemStack findActiveFishingRod() {
+        ItemStack heldItem = this.player.getHeldItemMainhand();
+        ItemStack heldItemOffhand = this.player.getHeldItemOffhand();
+        return isUsableFishingRod(heldItem) ? heldItem :
+            isUsableFishingRod(heldItemOffhand) ? heldItemOffhand : null;
     }
 
 
@@ -510,7 +544,10 @@ public class AutoFish {
 //
 
     private void reelIn() {
+        Logger.info("Reeling In");
         playerUseRod();
+        // Bug in Forge that doesn't delete the fishing hook entity
+        this.player.fishEntity = null;
     }
 
     private void startFishing() {
@@ -530,7 +567,8 @@ public class AutoFish {
     }
     
     private void scheduleNextCast() {
-        this.castScheduledAt = this.minecraftClient.world.getTotalWorldTime();
+        this.castScheduledAt = getGameTime();
+        Logger.info("Cast scheduled at %d", this.castScheduledAt);
     }
 
     /*
@@ -538,14 +576,14 @@ public class AutoFish {
      *  which can persist for 2-3 ticks.
      */
     private void startReelDelay() {
-        this.startedReelDelayAt = this.minecraftClient.world.getTotalWorldTime();
+        this.startedReelDelayAt = getGameTime();
     }
 
     /*
      * Trigger a delay so that entity clear protection doesn't kick in during cast.
      */
     private void startCastDelay() {
-        this.startedCastDelayAt = this.minecraftClient.world.getTotalWorldTime();
+        this.startedCastDelayAt = getGameTime();
     }
 
     private void resetReelDelay() {
@@ -559,11 +597,11 @@ public class AutoFish {
      * @param world
      */
     public void triggerBites() {
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+        MinecraftServer server = Minecraft.getInstance().getIntegratedServer();
         if (server != null) {
             for (EntityPlayer player : server.getPlayerList().getPlayers()) {
                 if (playerHookInWater(player)) {
-                    int ticks = FAST_FISH_CATCHABLE_DELAY_TICKS + MathHelper.getInt(this.rand, 0, FAST_FISH_DELAY_VARIANCE);
+                    int ticks = FAST_FISH_CATCHABLE_DELAY_TICKS + MathHelper.nextInt(this.rand, 0, FAST_FISH_DELAY_VARIANCE);
                     setTicksCatchableDelay(player.fishEntity, ticks);
                 }
             }
@@ -582,7 +620,7 @@ public class AutoFish {
              * to make fish bite sooner.
              */
             EntityFishHook serverFishEntity = serverPlayerEntity.fishEntity;
-            int ticks = FAST_FISH_CATCHABLE_DELAY_TICKS + MathHelper.getInt(this.rand, 0, FAST_FISH_DELAY_VARIANCE);
+            int ticks = FAST_FISH_CATCHABLE_DELAY_TICKS + MathHelper.nextInt(this.rand, 0, FAST_FISH_DELAY_VARIANCE);
             setTicksCatchableDelay(serverFishEntity, ticks);
         }
     }
@@ -603,20 +641,24 @@ public class AutoFish {
     }
 
     private EntityPlayer getServerPlayerEntity() {
-        if (this.minecraftClient.getIntegratedServer() == null || this.minecraftClient.getIntegratedServer().getEntityWorld() == null) {
+        if (this.minecraftClient.getIntegratedServer() == null || this.minecraftClient.getIntegratedServer().getWorld(DimensionType.OVERWORLD) == null) {
             return null;
         } else {
-            return this.minecraftClient.getIntegratedServer().getEntityWorld().getPlayerEntityByName(this.minecraftClient.player.getName());
+            return this.minecraftClient.getIntegratedServer().getWorld(DimensionType.OVERWORLD).getPlayerEntityByName(this.minecraftClient.player.getName().getString());
         }
     }
 
     private EnumActionResult playerUseRod() {
+        Logger.info("Using rod at %d", getGameTime());
         return this.minecraftClient.playerController.processRightClick(
                 this.player, 
-                this.minecraftClient.world, 
+                this.minecraftClient.world,
                 EnumHand.MAIN_HAND);
     }
     
+//    private boolean isInOffHand(ItemStack itemStack) {
+//        return findActiveFishingRod().getEquipmentSlot() == EntityEquipmentSlot.OFFHAND;
+//    }
     
     private void resetBiteTracking() {
         this.xpLastAddedAt = 0L;
@@ -633,7 +675,7 @@ public class AutoFish {
             ItemStack curItemStack = inventory.mainInventory.get(i);
             if (curItemStack != null 
                     && curItemStack.getItem() instanceof ItemFishingRod
-                    && (!ModAutoFish.config_autofish_preventBreak || (curItemStack.getMaxDamage() - curItemStack.getItemDamage() > AUTOFISH_BREAKPREVENT_THRESHOLD))
+                    && (!AutoFishModConfig.CLIENT.config_autofish_preventBreak.get() || (curItemStack.getMaxDamage() - curItemStack.getDamage() > AUTOFISH_BREAKPREVENT_THRESHOLD))
                 ) {
                 inventory.currentItem = i;
                 break;
@@ -652,11 +694,15 @@ public class AutoFish {
     private void checkForMissedBite() {
         if (playerHookInWater(this.player)) {
 //          recordLastHookPosition(this.player.fishEntity);
-          if (this.closeBobberSplashDetectedAt > 0 && this.minecraftClient.world.getTotalWorldTime() > this.closeBobberSplashDetectedAt + 45) {
-              Logger.debug("[%d] I think we missed a fish", this.minecraftClient.world.getTotalWorldTime());
+          if (this.closeBobberSplashDetectedAt > 0 && getGameTime() > this.closeBobberSplashDetectedAt + 45) {
+              Logger.debug("[%d] I think we missed a fish", getGameTime());
               resetBiteTracking();
           }
       }
+    }
+    
+    private long getGameTime() {
+        return this.minecraftClient.world.getGameTime();
     }
 
 }

@@ -4,23 +4,25 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Particles;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldEventListener;
-import net.minecraft.world.World;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 import net.unladenswallow.minecraft.autofish.AutoFish;
 import net.unladenswallow.minecraft.autofish.ModAutoFish;
+import net.unladenswallow.minecraft.autofish.config.AutoFishModConfig;
 import net.unladenswallow.minecraft.autofish.util.Logger;
 
 public class EventListener implements IWorldEventListener {
@@ -45,7 +47,7 @@ public class EventListener implements IWorldEventListener {
      */
     @SubscribeEvent
     public void onClientTickEvent(ClientTickEvent event) {
-        if (ModAutoFish.config_autofish_enable && event.phase == Phase.END) {
+        if (AutoFishModConfig.CLIENT.config_autofish_enable.get() && event.phase == Phase.END) {
             _autoFish.onClientTick();
         }
     }
@@ -62,7 +64,7 @@ public class EventListener implements IWorldEventListener {
          * all players, so that it will also affect all players that join a single player game that has
          * been opened to LAN play.
          */
-        if (ModAutoFish.config_autofish_enable && ModAutoFish.config_autofish_fastFishing && event.phase == Phase.END) {
+        if (AutoFishModConfig.CLIENT.config_autofish_enable.get() && AutoFishModConfig.CLIENT.config_autofish_fastFishing.get() && event.phase == Phase.END) {
             _autoFish.triggerBites();
         }
     }
@@ -74,8 +76,8 @@ public class EventListener implements IWorldEventListener {
      */
     @SubscribeEvent
     public void onPlaySoundEvent(PlaySoundEvent event) {
-        if (ModAutoFish.config_autofish_enable && SoundEvents.ENTITY_BOBBER_SPLASH.getSoundName() == event.getSound().getSoundLocation()) {
-            _autoFish.onBobberSplashDetected(event.getSound().getXPosF(), event.getSound().getYPosF(), event.getSound().getZPosF());
+        if (AutoFishModConfig.CLIENT.config_autofish_enable.get() && SoundEvents.ENTITY_FISHING_BOBBER_SPLASH.getName() == event.getSound().getSoundLocation()) {
+            _autoFish.onBobberSplashDetected(event.getSound().getX(), event.getSound().getY(), event.getSound().getZ());
         }
     }
     
@@ -86,9 +88,8 @@ public class EventListener implements IWorldEventListener {
      */
     @SubscribeEvent
     public void onWorldEvent_Load(WorldEvent.Load event) {
-        if (event.getWorld() != null && event.getWorld().isRemote) {
-            Logger.info("Attaching WorldEventListener");
-            event.getWorld().addEventListener(this);
+        if (event.getWorld() != null && event.getWorld().isRemote()) {
+            event.getWorld().getWorld().addEventListener(this);
         }
     }
     
@@ -101,7 +102,7 @@ public class EventListener implements IWorldEventListener {
     @SubscribeEvent
     public void onPlayerUseItem(PlayerInteractEvent.RightClickItem event) {
         // Only do this on the client side
-        if (ModAutoFish.config_autofish_enable && event.getWorld().isRemote) {
+        if (AutoFishModConfig.CLIENT.config_autofish_enable.get() && event.getWorld().isRemote) {
             _autoFish.onPlayerUseItem();
         }
     }
@@ -115,7 +116,7 @@ public class EventListener implements IWorldEventListener {
     @SubscribeEvent
     public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
         if (event.getModID().equals(ModAutoFish.MODID)) {
-            ModAutoFish.syncConfig();
+//            ModAutoFish.syncConfig();
         }
     }
     
@@ -126,24 +127,24 @@ public class EventListener implements IWorldEventListener {
     
     
     @Override
-    public void spawnParticle(int particleID, boolean ignoreRange, double xCoord, double yCoord, double zCoord,
-            double xSpeed, double ySpeed, double zSpeed, int... parameters) {
-        if (ModAutoFish.config_autofish_enable && particleID == EnumParticleTypes.WATER_WAKE.getParticleID()) {
-//            AutoFishLogger.info("Particle WATER_WAKE spawned with id %d at [%f, %f, %f]", particleID, xCoord, yCoord, zCoord);
-            _autoFish.onWaterWakeDetected(xCoord, yCoord, zCoord);
-        }
+    public void addParticle(IParticleData particleData, boolean alwaysRender, double x, double y, double z,
+            double xSpeed, double ySpeed, double zSpeed) {
+        addParticle(particleData, alwaysRender, false, x, y, z, xSpeed, ySpeed, zSpeed);
         
     }
 
+
     @Override
-    public void spawnParticle(int id, boolean ignoreRange, boolean p_190570_3_, double x, double y, double z,
-            double xSpeed, double ySpeed, double zSpeed, int... parameters) {
-        spawnParticle(id, ignoreRange, x, y, z, xSpeed, ySpeed, zSpeed, parameters);
+    public void addParticle(IParticleData particleData, boolean ignoreRange, boolean minimizeLevel, double x, double y,
+            double z, double xSpeed, double ySpeed, double zSpeed) {
+        if (AutoFishModConfig.CLIENT.config_autofish_enable.get() && particleData.getType() == Particles.FISHING) {
+            _autoFish.onWaterWakeDetected(x, y, z);
+        }
     }
 
     @Override
     public void onEntityAdded(Entity entityIn) {
-        if (ModAutoFish.config_autofish_enable && entityIn instanceof EntityXPOrb) {
+        if (AutoFishModConfig.CLIENT.config_autofish_enable.get() && entityIn instanceof EntityXPOrb) {
             _autoFish.onXpOrbAdded(entityIn.posX, entityIn.posY, entityIn.posZ);
         }
     }
@@ -151,7 +152,9 @@ public class EventListener implements IWorldEventListener {
     /********  Ignored World Events *********/
     
     @Override
-    public void notifyBlockUpdate(World worldIn, BlockPos pos, IBlockState oldState, IBlockState newState, int flags) {}
+    public void notifyBlockUpdate(IBlockReader worldIn, BlockPos pos, IBlockState oldState, IBlockState newState,
+            int flags) {}
+
 
     @Override
     public void notifyLightSet(BlockPos pos) {}
@@ -177,4 +180,6 @@ public class EventListener implements IWorldEventListener {
 
     @Override
     public void sendBlockBreakProgress(int breakerId, BlockPos pos, int progress) {}
+
+
 }

@@ -1,0 +1,11 @@
+modLoader="javafml"
+loaderVersion="[25,)"
+[[mods]]
+modId="mod_autofish"
+version="${file.jarVersion}"
+displayName="AutoFish Forge Mod"
+credits="troyboy50 for the original LiteMod Autofish; The Forge and FML team; SpacyNG; Maaiins; BoxOfFlex"
+authors="FreneticFeline"
+description='''
+Automatically reel in and re-cast when fishing.  A blatant copy of troyboy50's LiteMod version of Autofish that is built on MinecraftForge.
+'''

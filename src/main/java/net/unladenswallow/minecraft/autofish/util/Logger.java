@@ -88,6 +88,11 @@ public class Logger {
         log(Level.TRACE, format, data);
     }
 
+    public static void fatal(String format, Object... data)
+    {
+        log(Level.FATAL, format, data);
+    }
+
     public org.apache.logging.log4j.Logger getLogger()
     {
         return myLog;
