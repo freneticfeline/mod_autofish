@@ -5,6 +5,8 @@ import java.io.File;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 
+import net.minecraft.client.Minecraft;
+
 /**
  * Custom Logger for ModAutoFish.  Copied and modified from FMLRelaunchLog.
  * @author FreneticFeline
@@ -17,11 +19,16 @@ public class Logger {
      */
     public static Logger log = new Logger();
 
+    private static Minecraft minecraftClient;
     static File minecraftHome;
     private static boolean configured;
 
     private org.apache.logging.log4j.Logger myLog;
 
+    static {
+        minecraftClient = Minecraft.getInstance();
+    }
+    
     private Logger()
     {
     }
@@ -46,7 +53,11 @@ public class Logger {
         {
             configureLogging();
         }
-        log.myLog.log(level, String.format(format, data));
+        if (minecraftClient != null && minecraftClient.world != null) {
+            log.myLog.log(level, String.format("[%d] %s", minecraftClient.world.getGameTime(), String.format(format, data)));
+        } else {
+            log.myLog.log(level, String.format(format, data));
+        }
     }
 
     public static void log(String targetLog, Level level, Throwable ex, String format, Object... data)

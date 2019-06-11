@@ -23,7 +23,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 import net.unladenswallow.minecraft.autofish.AutoFish;
 import net.unladenswallow.minecraft.autofish.ModAutoFish;
 import net.unladenswallow.minecraft.autofish.config.AutoFishModConfig;
-import net.unladenswallow.minecraft.autofish.util.Logger;
 
 public class EventListener implements IWorldEventListener {
     
@@ -47,7 +46,7 @@ public class EventListener implements IWorldEventListener {
      */
     @SubscribeEvent
     public void onClientTickEvent(ClientTickEvent event) {
-        if (AutoFishModConfig.CLIENT.config_autofish_enable.get() && event.phase == Phase.END) {
+        if (event.phase == Phase.END) {
             _autoFish.onClientTick();
         }
     }
@@ -64,7 +63,7 @@ public class EventListener implements IWorldEventListener {
          * all players, so that it will also affect all players that join a single player game that has
          * been opened to LAN play.
          */
-        if (AutoFishModConfig.CLIENT.config_autofish_enable.get() && AutoFishModConfig.CLIENT.config_autofish_fastFishing.get() && event.phase == Phase.END) {
+        if (AutoFishModConfig.autofishEnabled() && AutoFishModConfig.fashFishingEnabled() && event.phase == Phase.END) {
             _autoFish.triggerBites();
         }
     }
@@ -76,7 +75,7 @@ public class EventListener implements IWorldEventListener {
      */
     @SubscribeEvent
     public void onPlaySoundEvent(PlaySoundEvent event) {
-        if (AutoFishModConfig.CLIENT.config_autofish_enable.get() && SoundEvents.ENTITY_FISHING_BOBBER_SPLASH.getName() == event.getSound().getSoundLocation()) {
+        if (AutoFishModConfig.autofishEnabled() && SoundEvents.ENTITY_FISHING_BOBBER_SPLASH.getName() == event.getSound().getSoundLocation()) {
             _autoFish.onBobberSplashDetected(event.getSound().getX(), event.getSound().getY(), event.getSound().getZ());
         }
     }
@@ -102,8 +101,8 @@ public class EventListener implements IWorldEventListener {
     @SubscribeEvent
     public void onPlayerUseItem(PlayerInteractEvent.RightClickItem event) {
         // Only do this on the client side
-        if (AutoFishModConfig.CLIENT.config_autofish_enable.get() && event.getWorld().isRemote) {
-            _autoFish.onPlayerUseItem();
+        if (AutoFishModConfig.autofishEnabled() && event.getWorld().isRemote) {
+            _autoFish.onPlayerUseItem(event.getHand());
         }
     }
     
@@ -137,14 +136,14 @@ public class EventListener implements IWorldEventListener {
     @Override
     public void addParticle(IParticleData particleData, boolean ignoreRange, boolean minimizeLevel, double x, double y,
             double z, double xSpeed, double ySpeed, double zSpeed) {
-        if (AutoFishModConfig.CLIENT.config_autofish_enable.get() && particleData.getType() == Particles.FISHING) {
+        if (AutoFishModConfig.autofishEnabled() && particleData.getType() == Particles.FISHING) {
             _autoFish.onWaterWakeDetected(x, y, z);
         }
     }
 
     @Override
     public void onEntityAdded(Entity entityIn) {
-        if (AutoFishModConfig.CLIENT.config_autofish_enable.get() && entityIn instanceof EntityXPOrb) {
+        if (AutoFishModConfig.autofishEnabled() && entityIn instanceof EntityXPOrb) {
             _autoFish.onXpOrbAdded(entityIn.posX, entityIn.posY, entityIn.posZ);
         }
     }
