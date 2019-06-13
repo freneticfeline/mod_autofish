@@ -3,7 +3,7 @@ package net.unladenswallow.minecraft.autofish.gui;
 import java.util.Set;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraftforge.fml.client.IModGuiFactory;
 
 public class GuiFactory implements IModGuiFactory {
@@ -23,8 +23,8 @@ public class GuiFactory implements IModGuiFactory {
     }
 
     @Override
-    public GuiScreen createConfigGui(GuiScreen parentScreen) {
-        return new ConfigGui(parentScreen);
+    public Screen createConfigGui(Screen parentScreen) {
+        return new ConfigGui();
     }
 
 }

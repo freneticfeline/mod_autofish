@@ -26,7 +26,7 @@ public class KeyInputHandler {
     public void onKeyInput(InputEvent.KeyInputEvent event) {
         if (this.options.isPressed()) {
             if (ModAutoFish.autoFish.playerIsHoldingRod()) {
-                Minecraft.getInstance().displayGuiScreen(new ConfigGui(Minecraft.getInstance().currentScreen));
+                Minecraft.getInstance().displayGuiScreen(new ConfigGui());
             }
         }
     }
