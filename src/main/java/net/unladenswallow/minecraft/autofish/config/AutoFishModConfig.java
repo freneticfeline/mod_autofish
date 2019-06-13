@@ -100,7 +100,7 @@ public class AutoFishModConfig {
         configOptions.add(new ConfigOption(CLIENT.config_autofish_multirod.getPath(), CLIENT.config_autofish_multirod.get(), "MultiRod"));
         configOptions.add(new ConfigOption(CLIENT.config_autofish_preventBreak.getPath(), CLIENT.config_autofish_preventBreak.get(), "Break Protection"));
         configOptions.add(new ConfigOption(CLIENT.config_autofish_recastDelay.getPath(), CLIENT.config_autofish_recastDelay.get(), "Re-Cast Delay"));
-//        configOptions.add(new ConfigOption(CLIENT.config_autofish_entityClearProtect.getPath(), CLIENT.config_autofish_entityClearProtect.get(), "Entity Clear Protection"));
+        configOptions.add(new ConfigOption(CLIENT.config_autofish_entityClearProtect.getPath(), CLIENT.config_autofish_entityClearProtect.get(), "Entity Clear Protection"));
         configOptions.add(new ConfigOption(CLIENT.config_autofish_aggressiveBiteDetection.getPath(),CLIENT.config_autofish_aggressiveBiteDetection.get(), "Aggressive Bite Detection"));
         configOptions.add(new ConfigOption(CLIENT.config_autofish_handleProblems.getPath(), CLIENT.config_autofish_handleProblems.get(), "Handle Problems"));
         configOptions.add(new ConfigOption(CLIENT.config_autofish_fastFishing.getPath(), CLIENT.config_autofish_fastFishing.get(), "Fast Fishing"));

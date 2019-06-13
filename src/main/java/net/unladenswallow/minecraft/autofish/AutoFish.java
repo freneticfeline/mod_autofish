@@ -684,8 +684,7 @@ public class AutoFish {
     }
     
     private void checkForEntityClear() {
-//        Logger.info("Checking for Entity Clear.  isFishing: %b; fishEntity: %s", this.isFishing, this.player.fishEntity);
-        if (this.isFishing && !isDuringCastDelay() && this.player.fishEntity == null) {
+        if (this.isFishing && !isDuringCastDelay() && (this.player.fishEntity == null || !this.player.fishEntity.isAddedToWorld())) {
             Logger.info("Entity Clear detected.  Re-casting.");
             this.isFishing = false;
             startFishing();

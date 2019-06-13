@@ -38,8 +38,6 @@ public class ConfigGui extends GuiScreen {
             drawString(this.fontRenderer, label.text, label.x, label.y, DRAW_STRING_MAGIC_NUMBER);
             bottomLabelY = Math.max(bottomLabelY, label.y);
         }
-        drawString(this.fontRenderer, "Note: Entity Clear Protect is not supported in this version.", 20, bottomLabelY + 20, DRAW_STRING_MAGIC_NUMBER);
-        drawString(this.fontRenderer, "Enable Handle Problems as a workaround.", 20, bottomLabelY + 30, DRAW_STRING_MAGIC_NUMBER);
         super.render(mouseX, mouseY, partialTicks);
     }
     
