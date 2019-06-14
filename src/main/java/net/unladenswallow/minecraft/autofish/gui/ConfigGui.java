@@ -29,15 +29,13 @@ public class ConfigGui extends Screen {
 
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
-        this.renderDirtBackground(10);
+        this.renderBackground();
         drawCenteredString(this.font, "AutoFish Forge Mod Options", this.width / 2, 20, DRAW_STRING_MAGIC_NUMBER);
         int bottomLabelY = 0;
         for (Label label : labels) {
             drawString(this.font, label.text, label.x, label.y, DRAW_STRING_MAGIC_NUMBER);
             bottomLabelY = Math.max(bottomLabelY, label.y);
         }
-//        drawString(this.font, "Note: Entity Clear Protect is not supported in this version.", 20, bottomLabelY + 20, DRAW_STRING_MAGIC_NUMBER);
-//        drawString(this.font, "Enable Handle Problems as a workaround.", 20, bottomLabelY + 30, DRAW_STRING_MAGIC_NUMBER);
         super.render(mouseX, mouseY, partialTicks);
     }
     
