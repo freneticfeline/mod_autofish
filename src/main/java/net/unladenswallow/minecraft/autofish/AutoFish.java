@@ -21,6 +21,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraftforge.fml.ForgeI18n;
 import net.unladenswallow.minecraft.autofish.config.AutoFishModConfig;
 import net.unladenswallow.minecraft.autofish.util.Logger;
 import net.unladenswallow.minecraft.autofish.util.ReflectionUtils;
@@ -47,8 +48,6 @@ public class AutoFish {
 //    private long exactBobberSplashDetectedAt = 0L;
     private Random rand;
     
-    private static final String NOTIFICATION_TEXT_AUTOFISH_ENABLED = "AutoFish is %s.  Type 'o' while holding a fishing rod for more options";
-
     private static final int TICKS_PER_SECOND = 20;
 
     /** How long to suppress checking for a bite after starting to reel in.  If we check for a bite while reeling
@@ -463,16 +462,19 @@ public class AutoFish {
     private boolean somethingSeemsWrong() {
         if (rodIsCast() && !isDuringCastDelay() && !isDuringReelDelay() && hookShouldBeInWater()) {
             if ((playerHookInWater(this.player) || AutoFishModConfig.handleProblemsEnabled()) && waitedLongEnough()) {
-                Logger.info("We should have caught something by now.");
+                sendMessageToPlayer(ForgeI18n.parseMessage("chat.autofish.timeout"));
+                this.isFishing = false;
                 return true;
             }
             if (AutoFishModConfig.handleProblemsEnabled()) {
                 if (hookedAnEntity()) {
-                    Logger.info("Oops, we hooked an Entity");
+                    sendMessageToPlayer(ForgeI18n.parseMessage("chat.autofish.hookedentity"));
+                    this.isFishing = false;
                     return true;
                 }
                 if (!playerHookInWater(this.player)) {
-                    Logger.info("Hook should be in water but isn't.");
+                    sendMessageToPlayer(ForgeI18n.parseMessage("chat.autofish.notinwater"));
+                    this.isFishing = false;
                     return true;
                 }
             }
@@ -480,6 +482,13 @@ public class AutoFish {
         return false;
     }
     
+    private void sendMessageToPlayer(String message) {
+        this.player.sendMessage(new StringTextComponent(String.format("[AutoFish] %s", message)));
+
+    }
+
+
+
     private boolean hookedAnEntity() {
         if (this.player.fishingBobber != null && this.player.fishingBobber.caughtEntity != null) {
             return true;
@@ -545,8 +554,9 @@ public class AutoFish {
 
     
     private void showNotificationToPlayer() {
-        String notification = String.format(NOTIFICATION_TEXT_AUTOFISH_ENABLED, AutoFishModConfig.autofishEnabled() ? "enabled" : "disabled");
-        this.player.sendMessage(new StringTextComponent(notification));
+        String enabledPatternName = String.format("chat.autofish.%s", AutoFishModConfig.autofishEnabled() ? "enabled" : "disabled");
+        String enabledOrDisabled = ForgeI18n.parseMessage(enabledPatternName);
+        sendMessageToPlayer(ForgeI18n.parseMessage("chat.autofish.welcome", enabledOrDisabled, ModAutoFish.keyInputHandler.getOptionsKey()));
         this.notificationShownToPlayer = true;
     }
     
@@ -690,7 +700,7 @@ public class AutoFish {
     
     private void checkForEntityClear() {
         if (this.isFishing && !isDuringCastDelay() && (this.player.fishingBobber == null || !this.player.fishingBobber.isAddedToWorld())) {
-            Logger.info("Entity Clear detected.  Re-casting.");
+            sendMessageToPlayer(ForgeI18n.parseMessage("chat.autofish.entityclear"));
             this.isFishing = false;
             startFishing();
         }
