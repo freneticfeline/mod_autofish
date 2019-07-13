@@ -32,7 +32,10 @@ public class ModAutoFish {
         FMLJavaModLoadingContext.get().getModEventBus().register(AutoFishModConfig.class);
         MinecraftForge.EVENT_BUS.register(this);
         AutoFishModConfig.register(ModLoadingContext.get());
-//        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, screen) -> new ConfigGui());
+//        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, screen) -> {
+//            Logger.info("CONFIGGUIFACTORY thing is called");
+//            return new ConfigGui();
+//        });
     }
     
     @SubscribeEvent

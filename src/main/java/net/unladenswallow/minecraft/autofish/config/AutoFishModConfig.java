@@ -93,8 +93,8 @@ public class AutoFishModConfig {
     
     @SubscribeEvent
     public static void onLoad(final ModConfig.Loading configEvent) {
-        Logger.info("Loaded AutoFishMod config file {}", configEvent.getConfig().getFileName());
         ConfigFilePath = configEvent.getConfig().getFullPath().toString();
+        Logger.info("Loaded AutoFishMod config file %s", ConfigFilePath);
     }
 
     public static List<ConfigOption> getOrderedConfigValues() {

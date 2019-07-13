@@ -666,7 +666,7 @@ public class AutoFish {
     }
 
     private ActionResultType playerUseRod() {
-        return this.minecraftClient.field_71442_b.processRightClick(
+        return this.minecraftClient.playerController.processRightClick(
                 this.player, 
                 this.minecraftClient.world,
                 isUsableFishingRod(this.player.getHeldItemMainhand()) ? Hand.MAIN_HAND : Hand.OFF_HAND);
