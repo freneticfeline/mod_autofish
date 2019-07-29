@@ -656,10 +656,10 @@ public class AutoFish {
     }
 
     private ServerPlayerEntity getServerPlayerEntity() {
-        if (this.minecraftClient.getIntegratedServer() == null || this.minecraftClient.getIntegratedServer().getWorld(DimensionType.field_223227_a_ /* OVERWORLD */) == null) {
+        if (this.minecraftClient.getIntegratedServer() == null || this.minecraftClient.getIntegratedServer().getWorld(DimensionType.OVERWORLD) == null) {
             return null;
         } else {
-            return this.minecraftClient.getIntegratedServer().getWorld(DimensionType.field_223227_a_ /* OVERWORLD */)
+            return this.minecraftClient.getIntegratedServer().getWorld(DimensionType.OVERWORLD)
                     .getPlayers((p) -> p.getName().getString().equals(this.minecraftClient.player.getName().getString()))
                     .get(0);
         }
