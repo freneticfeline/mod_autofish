@@ -1,7 +1,7 @@
 {
     "chat.autofish.enabled" : "enabled",
     "chat.autofish.disabled" : "disabled",
-    "chat.autofish.welcome" : "AutoFish is {0}.  Type ''{1}'' while holding a fishing rod for more options",
+    "chat.autofish.welcome" : "AutoFish is {0}.  Press ''{1}'' while holding a fishing rod for more options",
     "chat.autofish.timeout" : "We should have caught something by now.  Re-casting.",
     "chat.autofish.entityclear" : "Entity Clear detected.  Re-casting.",
     "chat.autofish.hookedentity" : "Oops, we hooked an Entity.  Re-casting.",
