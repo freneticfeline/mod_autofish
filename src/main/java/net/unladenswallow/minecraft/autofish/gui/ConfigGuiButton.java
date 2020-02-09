@@ -2,13 +2,13 @@ package net.unladenswallow.minecraft.autofish.gui;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraftforge.fml.ForgeI18n;
-import net.minecraftforge.fml.client.config.GuiButtonExt;
+import net.minecraftforge.fml.client.gui.widget.ExtendedButton;
 import net.unladenswallow.minecraft.autofish.config.AutoFishModConfig;
 import net.unladenswallow.minecraft.autofish.config.ConfigOption;
 import net.unladenswallow.minecraft.autofish.config.ConfigOption.ValueType;
 import net.unladenswallow.minecraft.autofish.util.Logger;
 
-class ConfigGuiButton extends GuiButtonExt {
+class ConfigGuiButton extends ExtendedButton {
 
     private ConfigOption configOption;
 

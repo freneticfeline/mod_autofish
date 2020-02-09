@@ -7,7 +7,6 @@ import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.unladenswallow.minecraft.autofish.config.AutoFishModConfig;
 import net.unladenswallow.minecraft.autofish.events.EventListener;
@@ -32,10 +31,10 @@ public class ModAutoFish {
         FMLJavaModLoadingContext.get().getModEventBus().register(AutoFishModConfig.class);
         MinecraftForge.EVENT_BUS.register(this);
         AutoFishModConfig.register(ModLoadingContext.get());
-//        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, screen) -> {
-//            Logger.info("CONFIGGUIFACTORY thing is called");
-//            return new ConfigGui();
-//        });
+        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, screen) -> {
+            Logger.info("CONFIGGUIFACTORY thing is called");
+            return new ConfigGui();
+        });
     }
     
     @SubscribeEvent

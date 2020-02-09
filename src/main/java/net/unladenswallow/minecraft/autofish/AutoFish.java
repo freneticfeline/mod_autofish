@@ -18,6 +18,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.dimension.DimensionType;
@@ -124,7 +125,7 @@ public class AutoFish {
             FishingBobberEntity hook = this.player.fishingBobber;
 //                double yDifference = Math.abs(hook.posY - y);
             // Ignore Y component when calculating distance from hook
-            double xzDistanceFromHook = hook.getDistanceSq(x, hook.posY, z);
+            double xzDistanceFromHook = hook.getDistanceSq(x, hook.getPositionVec().y, z);
             if (xzDistanceFromHook <= CLOSE_BOBBER_SPLASH_THRESHOLD) {
 //                    AutoFishLogger.info("[%d] Close bobber splash at %f /  %f", getGameTime(), xzDistanceFromHook, yDifference);
                 this.closeBobberSplashDetectedAt = getGameTime();
@@ -186,7 +187,8 @@ public class AutoFish {
     public void onWaterWakeDetected(double x, double y, double z) {
         if (this.minecraftClient != null && this.minecraftClient.player != null && playerHookInWater(this.minecraftClient.player)) {
             FishingBobberEntity hook = this.minecraftClient.player.fishingBobber;
-            double distanceFromHook = new BlockPos(x, y, z).distanceSq(new Vec3i(hook.posX, hook.posY, hook.posZ));
+            Vec3d hookPosition = hook.getPositionVec();
+            double distanceFromHook = new BlockPos(x, y, z).distanceSq(new Vec3i(hookPosition.x, hookPosition.y, hookPosition.z));
             if (distanceFromHook <= CLOSE_WATER_WAKE_THRESHOLD) {
                 if (this.closeWaterWakeDetectedAt <= 0) {
 //                    AutoFishLogger.info("[%d] Close water wake at %f", getGameTime(), distanceFromHook);
@@ -426,7 +428,8 @@ public class AutoFish {
         // water block, so also check a fraction of a block distance lower to see if that is water.
         // (EntityFishHook.isInWater() seems to be completely broken in 1.13)
         BlockState hookBlockState = player.fishingBobber.getEntityWorld().getBlockState(new BlockPos(player.fishingBobber));
-        BlockState justBelowHookBlockState = player.fishingBobber.getEntityWorld().getBlockState(new BlockPos(player.fishingBobber.posX, player.fishingBobber.posY - 0.25, player.fishingBobber.posZ));
+        Vec3d hookPosition = player.fishingBobber.getPositionVec();
+        BlockState justBelowHookBlockState = player.fishingBobber.getEntityWorld().getBlockState(new BlockPos(hookPosition.x, hookPosition.y - 0.25, hookPosition.z));
         boolean hookIsInWater = hookBlockState.getMaterial() == Material.WATER || justBelowHookBlockState.getMaterial() == Material.WATER;
         return hookIsInWater;
     }

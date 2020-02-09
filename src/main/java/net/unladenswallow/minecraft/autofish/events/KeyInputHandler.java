@@ -1,7 +1,5 @@
 package net.unladenswallow.minecraft.autofish.events;
 
-import java.util.function.Supplier;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;

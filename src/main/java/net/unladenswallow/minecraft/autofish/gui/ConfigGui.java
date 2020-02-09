@@ -8,7 +8,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.fml.ForgeI18n;
-import net.minecraftforge.fml.client.config.GuiButtonExt;
+import net.minecraftforge.fml.client.gui.widget.ExtendedButton;
 import net.unladenswallow.minecraft.autofish.config.AutoFishModConfig;
 import net.unladenswallow.minecraft.autofish.config.ConfigOption;
 import net.unladenswallow.minecraft.autofish.util.Logger;
@@ -74,7 +74,7 @@ public class ConfigGui extends Screen {
             addButton(new ConfigGuiButton(this.font, buttonX, rowY, BUTTON_WIDTH, BUTTON_HEIGHT, option));
             buttonIndex++;
         }
-        addButton(new GuiButtonExt((this.width - BUTTON_WIDTH) / 2, this.height - 20 - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT, ForgeI18n.parseMessage("gui.autofish.config.done"),
+        addButton(new ExtendedButton((this.width - BUTTON_WIDTH) / 2, this.height - 20 - BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT, ForgeI18n.parseMessage("gui.autofish.config.done"),
                 b -> {this.closeGui();}));
     }
 
@@ -126,7 +126,7 @@ public class ConfigGui extends Screen {
 
         @Override
         public void renderToolTip(int mouseX, int mouseY) {
-            net.minecraftforge.fml.client.config.GuiUtils.drawHoveringText(
+            net.minecraftforge.fml.client.gui.GuiUtils.drawHoveringText(
                     Arrays.asList(this.tooltip), 
                     mouseX, 
                     mouseY, 

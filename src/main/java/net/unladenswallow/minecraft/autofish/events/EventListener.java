@@ -3,6 +3,7 @@ package net.unladenswallow.minecraft.autofish.events;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
@@ -102,7 +103,8 @@ public class EventListener { // implements IWorldEventListener {
         if (AutoFishModConfig.autofishEnabled() && event.getWorld().isRemote) {
             Entity entity = event.getEntity();
             if (entity instanceof ExperienceOrbEntity) {
-                _autoFish.onXpOrbAdded(entity.posX, entity.posY, entity.posZ);
+                Vec3d entityPosition = entity.getPositionVec();
+                _autoFish.onXpOrbAdded(entityPosition.x, entityPosition.y, entityPosition.z);
             }
         }
     }
