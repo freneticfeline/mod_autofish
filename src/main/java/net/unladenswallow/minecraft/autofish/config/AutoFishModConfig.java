@@ -34,7 +34,7 @@ public class AutoFishModConfig {
     private static final Joiner DotJoiner = Joiner.on(".");
     private static final ForgeConfigSpec clientSpec;
     private static final ClientConfig CLIENT;
-    private static String ConfigFilePath;
+    public static String ConfigFilePath;
     private static List<ConfigOption> configOptions;
     
     static {
@@ -93,20 +93,22 @@ public class AutoFishModConfig {
     
     @SubscribeEvent
     public static void onLoad(final ModConfig.Loading configEvent) {
-        Logger.info("Loaded AutoFishMod config file {}", configEvent.getConfig().getFileName());
         ConfigFilePath = configEvent.getConfig().getFullPath().toString();
-        configOptions = new ArrayList<ConfigOption>();
-        configOptions.add(new ConfigOption(CLIENT.config_autofish_enable.getPath(), CLIENT.config_autofish_enable.get(), "AutoFish"));
-        configOptions.add(new ConfigOption(CLIENT.config_autofish_multirod.getPath(), CLIENT.config_autofish_multirod.get(), "MultiRod"));
-        configOptions.add(new ConfigOption(CLIENT.config_autofish_preventBreak.getPath(), CLIENT.config_autofish_preventBreak.get(), "Break Protection"));
-        configOptions.add(new ConfigOption(CLIENT.config_autofish_recastDelay.getPath(), CLIENT.config_autofish_recastDelay.get(), "Re-Cast Delay"));
-//        configOptions.add(new ConfigOption(CLIENT.config_autofish_entityClearProtect.getPath(), CLIENT.config_autofish_entityClearProtect.get(), "Entity Clear Protection"));
-        configOptions.add(new ConfigOption(CLIENT.config_autofish_aggressiveBiteDetection.getPath(),CLIENT.config_autofish_aggressiveBiteDetection.get(), "Aggressive Bite Detection"));
-        configOptions.add(new ConfigOption(CLIENT.config_autofish_handleProblems.getPath(), CLIENT.config_autofish_handleProblems.get(), "Handle Problems"));
-        configOptions.add(new ConfigOption(CLIENT.config_autofish_fastFishing.getPath(), CLIENT.config_autofish_fastFishing.get(), "Fast Fishing"));
+        Logger.info("Loaded AutoFishMod config file %s", ConfigFilePath);
     }
 
     public static List<ConfigOption> getOrderedConfigValues() {
+        if (configOptions == null) {
+            configOptions = new ArrayList<ConfigOption>();
+            configOptions.add(new ConfigOption(CLIENT.config_autofish_enable.getPath(), CLIENT.config_autofish_enable.get(), "gui.autofish.config.enabled"));
+            configOptions.add(new ConfigOption(CLIENT.config_autofish_multirod.getPath(), CLIENT.config_autofish_multirod.get(), "gui.autofish.config.multirod"));
+            configOptions.add(new ConfigOption(CLIENT.config_autofish_preventBreak.getPath(), CLIENT.config_autofish_preventBreak.get(), "gui.autofish.config.preventbreak"));
+            configOptions.add(new ConfigOption(CLIENT.config_autofish_recastDelay.getPath(), CLIENT.config_autofish_recastDelay.get(), "gui.autofish.config.recastdelay"));
+            configOptions.add(new ConfigOption(CLIENT.config_autofish_entityClearProtect.getPath(), CLIENT.config_autofish_entityClearProtect.get(), "gui.autofish.config.entityclearprotect"));
+            configOptions.add(new ConfigOption(CLIENT.config_autofish_aggressiveBiteDetection.getPath(),CLIENT.config_autofish_aggressiveBiteDetection.get(), "gui.autofish.config.aggressive"));
+            configOptions.add(new ConfigOption(CLIENT.config_autofish_handleProblems.getPath(), CLIENT.config_autofish_handleProblems.get(), "gui.autofish.config.handleproblems"));
+            configOptions.add(new ConfigOption(CLIENT.config_autofish_fastFishing.getPath(), CLIENT.config_autofish_fastFishing.get(), "gui.autofish.config.fastfishing"));
+        }
         return configOptions;
     }
 
@@ -159,7 +161,7 @@ public class AutoFishModConfig {
     private static ConfigOption findConfigOption(List<String> configPath) {
         if (configPath == null) return null;
         
-        for (ConfigOption option : configOptions) {
+        for (ConfigOption option : getOrderedConfigValues()) {
             if (option.configPath.equals(configPath)) {
                 return option;
             }
