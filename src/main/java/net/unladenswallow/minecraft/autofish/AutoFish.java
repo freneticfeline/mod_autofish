@@ -669,10 +669,12 @@ public class AutoFish {
     }
 
     private ActionResultType playerUseRod() {
+        Hand rodHand = isUsableFishingRod(this.player.getHeldItemMainhand()) ? Hand.MAIN_HAND : Hand.OFF_HAND;
+        this.player.swingArm(rodHand);
         return this.minecraftClient.playerController.processRightClick(
                 this.player, 
                 this.minecraftClient.world,
-                isUsableFishingRod(this.player.getHeldItemMainhand()) ? Hand.MAIN_HAND : Hand.OFF_HAND);
+                rodHand);
     }
     
 //    private boolean isInOffHand(ItemStack itemStack) {
